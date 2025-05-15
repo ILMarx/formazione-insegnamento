@@ -1,4 +1,72 @@
-# formazione-insegnamento
-Metadata mirror for the journal Formazione &amp; insegnamento
-⚠️ Note: The GitHub licence badge refers to an earlier CC0 setting. The current licence for this repository is **Creative Commons Attribution 4.0 (CC BY 4.0)**.
-[View full licence →](https://creativecommons.org/licenses/by/4.0/)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formazione & Insegnamento – Metadata Mirror</title>
+  <meta name="description" content="Multilingual metadata portal for the journal Formazione & Insegnamento">
+  <link rel="canonical" href="https://formazione-insegnamento.eu/">
+  <style>
+    body { font-family: sans-serif; margin: 2em auto; max-width: 800px; line-height: 1.6; }
+    nav { margin-bottom: 2em; }
+    nav button { margin-right: 10px; padding: 0.5em 1em; cursor: pointer; }
+    section { display: none; }
+    section.active { display: block; }
+    footer { margin-top: 3em; font-size: 0.9em; color: #666; }
+    .notice { background: #fff8dc; border-left: 5px solid #f90; padding: 1em; margin-top: 1em; }
+  </style>
+</head>
+<body>
+  <h1>Formazione & Insegnamento</h1>
+  <p><strong>Metadata mirror for the journal <em>Formazione &amp; insegnamento</em></strong></p>
+
+  <nav>
+    <button onclick="switchLang('en')">English</button>
+    <button onclick="switchLang('it')">Italiano</button>
+    <button onclick="switchLang('es')">Español</button>
+    <button onclick="switchLang('pt')">Português</button>
+    <button onclick="switchLang('fr')">Français</button>
+  </nav>
+
+  <section id="lang-en" class="active" lang="en">
+    <p>Welcome to the official metadata mirror of the journal <em>Formazione & Insegnamento</em>. This site provides structured access to article-level metadata and redirects to the publisher's canonical platform.</p>
+    <p><a href="https://ojs.pensamultimedia.it/index.php/siref">Access the journal</a></p>
+  </section>
+
+  <section id="lang-it" lang="it">
+    <p>Benvenuti nel mirror ufficiale dei metadati della rivista <em>Formazione & Insegnamento</em>. Questo sito fornisce accesso strutturato ai metadati degli articoli e rimanda alla piattaforma editoriale ufficiale.</p>
+    <p><a href="https://ojs.pensamultimedia.it/index.php/siref">Accedi alla rivista</a></p>
+  </section>
+
+  <section id="lang-es" lang="es">
+    <p>Bienvenidos al portal oficial de metadatos de la revista <em>Formazione & Insegnamento</em>. Este sitio ofrece acceso estructurado a los metadatos de los artículos y redirige a la plataforma editorial original.</p>
+    <p><a href="https://ojs.pensamultimedia.it/index.php/siref">Acceder a la revista</a></p>
+  </section>
+
+  <section id="lang-pt" lang="pt">
+    <p>Bem-vindo ao espelho oficial de metadados da revista <em>Formazione & Insegnamento</em>. Este site fornece acesso estruturado aos metadados dos artigos e redireciona para a plataforma do editor.</p>
+    <p><a href="https://ojs.pensamultimedia.it/index.php/siref">Acessar a revista</a></p>
+  </section>
+
+  <section id="lang-fr" lang="fr">
+    <p>Bienvenue sur le miroir officiel des métadonnées de la revue <em>Formazione & Insegnamento</em>. Ce site offre un accès structuré aux métadonnées des articles et redirige vers la plateforme éditoriale originale.</p>
+    <p><a href="https://ojs.pensamultimedia.it/index.php/siref">Accéder à la revue</a></p>
+  </section>
+
+  <div class="notice">
+    <p>⚠️ <strong>Note:</strong> The GitHub licence badge refers to an earlier CC0 setting. The current licence for this repository is <strong>Creative Commons Attribution 4.0 (CC BY 4.0)</strong>.<br>
+    <a href="https://creativecommons.org/licenses/by/4.0/">View full licence →</a></p>
+  </div>
+
+  <footer>
+    <p>This portal is maintained by the editorial team of <em>Formazione & Insegnamento</em>. Metadata licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+  </footer>
+
+  <script>
+    function switchLang(lang) {
+      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById('lang-' + lang).classList.add('active');
+    }
+  </script>
+</body>
+</html>
