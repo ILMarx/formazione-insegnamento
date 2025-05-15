@@ -21,11 +21,11 @@
   <p><strong>Metadata mirror for the journal <em>Formazione &amp; insegnamento</em></strong></p>
 
   <nav>
-    <button onclick="switchLang('en')">English</button>
-    <button onclick="switchLang('it')">Italiano</button>
-    <button onclick="switchLang('es')">Español</button>
-    <button onclick="switchLang('pt')">Português</button>
-    <button onclick="switchLang('fr')">Français</button>
+    <button onclick="switchLang('en')"><strong>English</strong></button>
+    <button onclick="switchLang('it')"><strong>Italiano</strong></button>
+    <button onclick="switchLang('es')"><strong>Español</strong></button>
+    <button onclick="switchLang('pt')"><strong>Português</strong></button>
+    <button onclick="switchLang('fr')"><strong>Français</strong></button>
   </nav>
 
   <section id="lang-en" class="active" lang="en">
