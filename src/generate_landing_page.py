@@ -4,24 +4,23 @@ generate_landing_page.py
 Genera landing page HTML dal database CSV in C:\dev\mirror_page_creator\output.
 Richiede: pip install jinja2 python-dateutil
 """
-import os
-import csv
-import sys
-import re
-import unicodedata
-import json
+import os, csv, sys, re, unicodedata, json
 from dateutil.parser import isoparse
 from dateutil.tz import gettz
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-# --- CONFIGURAZIONE ---
-# core data now lives at data/FI_DATABASE.csv in the repo
+# === CONFIGURATION ===
+# script is in src/, repo root is one level up
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_CSV   = os.path.join(SCRIPT_DIR, 'data', 'FI_DATABASE.csv')
-TEMPLATE_DIR = os.path.join(SCRIPT_DIR, 'templates')
-OUTPUT_DIR   = os.path.join(SCRIPT_DIR, 'output')
+REPO_ROOT  = os.path.dirname(SCRIPT_DIR)
+
+# now data/ and templates/ at repo root
+DATA_CSV     = os.path.join(REPO_ROOT, 'data', 'FI_DATABASE.csv')
+TEMPLATE_DIR = os.path.join(REPO_ROOT, 'templates')
 TEMPLATE_FILE = 'landing_template.html'
-LANGUAGES = ['en','it','fr','es','pt']
+OUTPUT_DIR   = os.path.join(REPO_ROOT, 'output')
+
+LANGUAGES = ['en', 'it', 'fr', 'es', 'pt']
 
 # Metadati periodico
 JOURNAL_META = {
