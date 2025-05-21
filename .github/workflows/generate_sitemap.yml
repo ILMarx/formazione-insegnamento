@@ -2,7 +2,7 @@ name: Generate Sitemap
 
 on:
   push:
-    branches: [main, ci/landing-pages]
+    branches: [main]
 
 jobs:
   build:
@@ -11,6 +11,9 @@ jobs:
 
       - name: List files for debugging
         run: ls -R
+
+      - name: Print working directory
+        run: pwd
     
       - name: Checkout repo
         uses: actions/checkout@v3
