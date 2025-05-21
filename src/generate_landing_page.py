@@ -139,14 +139,16 @@ def generate_pages():
             except:
                 date_iso = f"{raw_citation}T00:00:00+01:00"
 
-                        # Slug and nested output file under year/volume/issue/
+            # Slug and nested output file under year/volume/issue/
             title_en = get_field(row, 'Title', 'en')
             slug     = slugify(title_en)
 
             # Build the path parts
             year    = row.get('PublicationYear', 'unknown-year')
-            vol     = row.get('Volume', '0').zfill(3)    # pad to 3 digits if you like
-            issue   = row.get('Issue', '0').zfill(3)
+            vol     = row.get('Volume', '0')
+            issue   = row.get('Issue', '0')
+
+            # Create the directory tree
             subdir  = os.path.join(OUTPUT_DIR, year, vol, issue)
             os.makedirs(subdir, exist_ok=True)
 
