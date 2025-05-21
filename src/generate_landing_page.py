@@ -232,6 +232,7 @@ def generate_pages():
         f.write(idx_html)
     print("Generata: index.html")
 
+    # Print timestamp
     print(f"Totale: {count} pagine generate in '{OUTPUT_DIR}'.")
 
 if __name__ == '__main__':
