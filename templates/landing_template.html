@@ -94,6 +94,10 @@
     <!-- Journal title in italic, slightly larger -->
     <p style="font-size:1.25em; font-style:italic; margin-top:0;">{{ journal.title }}</p>
     <p>ISSN: {{ journal.issn }} | Published: {{ general.Citation_Date }}T00:00:00+01:00</p>
+    <p><strong>Main Article Landing Page:</strong> <a href="https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}" target="_blank">https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}</a></p>
+    <p><strong>Full Text HTML:</strong> {% if general.Full_Text_HTML_URL %}<a href="{{ general.Full_Text_HTML_URL }}" target="_blank">{{ general.Full_Text_HTML_URL }}</a>{% else %}missing data{% endif %}</p>
+    <p><strong>Full Text PDF:</strong> {% if general.PDF_URL %}<a href="{{ general.PDF_URL }}" target="_blank">{{ general.PDF_URL }}</a>{% else %}missing data{% endif %}</p>
+    <p><strong>Full Text XML:</strong> {% if general.Full_Text_XML_URL %}<a href="{{ general.Full_Text_XML_URL }}" target="_blank">{{ general.Full_Text_XML_URL }}</a>{% else %}missing data{% endif %}</p>
     <p><strong>Mirror URL:</strong> <a href="{{ mirror_url }}" target="_blank">{{ mirror_url }}</a></p>
   </header>
 
@@ -129,10 +133,6 @@
       <li><strong>Pages:</strong> {{ general.Pages or 'missing data' }}</li>
       <li><strong>Publication Date (online first):</strong> {{ general.DatePublishedISO or 'missing data' }}</li>
       <li><strong>DOI:</strong> {% if general.DOI %}<a href="https://doi.org/{{ general.DOI }}" target="_blank">{{ general.DOI }}</a>{% else %}missing data{% endif %}</li>
-      <li><strong>Main Article Landing Page:</strong> <a href="https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}" target="_blank">https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}</a></li>
-      <li><strong>Full Text HTML:</strong> {% if general.Full_Text_HTML_URL %}<a href="{{ general.Full_Text_HTML_URL }}" target="_blank">{{ general.Full_Text_HTML_URL }}</a>{% else %}missing data{% endif %}</li>
-      <li><strong>Full Text PDF:</strong> {% if general.PDF_URL %}<a href="{{ general.PDF_URL }}" target="_blank">{{ general.PDF_URL }}</a>{% else %}missing data{% endif %}</li>
-      <li><strong>Full Text XML:</strong> {% if general.Full_Text_XML_URL %}<a href="{{ general.Full_Text_XML_URL }}" target="_blank">{{ general.Full_Text_XML_URL }}</a>{% else %}missing data{% endif %}</li>
       <li><strong>License:</strong> <a href="{{ journal.license }}" target="_blank">{{ journal.license }}</a></li>
     </ul>
   </section>
