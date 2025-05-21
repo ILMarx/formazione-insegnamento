@@ -8,13 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-
-      - name: List files for debugging
-        run: ls -R
-
-      - name: Print working directory
-        run: pwd
-    
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -25,6 +18,9 @@ jobs:
 
       - name: Generate sitemap.xml
         run: python3 src/generate_sitemap.py
+
+      - name: Create output directory
+        run: mkdir -p output
 
       - name: Move sitemap.xml to output
         run: mv sitemap.xml output/
