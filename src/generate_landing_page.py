@@ -15,10 +15,10 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT  = os.path.dirname(SCRIPT_DIR)
 
 # now data/ and templates/ at repo root
-DATA_CSV     = os.path.join(REPO_ROOT, 'data', 'FI_DATABASE.csv')
-TEMPLATE_DIR = os.path.join(REPO_ROOT, 'templates')
+DATA_CSV      = os.path.join(REPO_ROOT, 'data', 'FI_DATABASE.csv')
+TEMPLATE_DIR  = os.path.join(REPO_ROOT, 'templates')
 TEMPLATE_FILE = 'landing_template.html'
-OUTPUT_DIR   = os.path.join(REPO_ROOT, 'output')
+OUTPUT_DIR    = os.path.join(REPO_ROOT, 'output')
 
 LANGUAGES = ['en', 'it', 'fr', 'es', 'pt']
 
@@ -44,6 +44,10 @@ JOURNAL_META = {
     'url': 'https://ojs.pensamultimedia.it/index.php/siref',
     'license': 'https://creativecommons.org/licenses/by/4.0'
 }
+
+# Base URLs for mirror and original
+MIRROR_BASE   = 'https://formazione-insegnamento.eu'
+ORIGINAL_BASE = JOURNAL_META['url'] + '/article/view'
 
 # Utility: crea slug
 
@@ -106,6 +110,8 @@ def init_template():
         loader=FileSystemLoader(TEMPLATE_DIR),
         autoescape=select_autoescape(['html', 'xml'])
     )
+    # make slugify available in templates
+    env.filters['slugify'] = slugify
     template = env.get_template(TEMPLATE_FILE)
 
 # Helper per campi multilingua
@@ -128,83 +134,84 @@ def generate_pages():
             if not aid:
                 continue
 
-            # Date handling with new fields
-            publication_date = row.get('PublicationDate', '')
-            submission_date = row.get('SubmissionDate', '')
-            issue_date = row.get('IssueDate', '')
-            raw_citation = row.get('Citation_Date', '')
+            # Date handling
+            raw_cit = row.get('Citation_Date', '')
             try:
-                dt = isoparse(raw_citation).replace(tzinfo=gettz('Europe/Rome'))
+                dt = isoparse(raw_cit).replace(tzinfo=gettz('Europe/Rome'))
                 date_iso = dt.isoformat()
             except:
-                date_iso = f"{raw_citation}T00:00:00+01:00"
+                date_iso = f"{raw_cit}T00:00:00+01:00"
 
-            # Slug and nested output file under year/volume/issue/
+            # Slug and nested output under year/volume/issue
             title_en = get_field(row, 'Title', 'en')
             slug     = slugify(title_en)
-
-            # Build the path parts
-            year    = row.get('PublicationYear', 'unknown-year')
-            vol     = row.get('Volume', '0')
-            issue   = row.get('Issue', '0')
-
-            # Create the directory tree
-            subdir  = os.path.join(OUTPUT_DIR, year, vol, issue)
+            year     = row.get('PublicationYear', 'unknown-year')
+            vol      = row.get('Volume',  '0')
+            issue    = row.get('Issue',   '0')
+            subdir   = os.path.join(OUTPUT_DIR, year, vol, issue)
             os.makedirs(subdir, exist_ok=True)
-
-            # Output filename
             filename = f"{aid}-{slug}.html"
             outfile  = os.path.join(subdir, filename)
 
-            # Meta generali including new date fields
-            authors_list = parse_authors(row.get('Authors_Detail','[]'))
+            # Parse lists
+            authors_list    = parse_authors(row.get('Authors_Detail','[]'))
             references_list = parse_references(row.get('References','[]'))
+
             general = {
-                'Journal_Title': row.get('Journal_Title'),
-                'Journal_ISSN': row.get('Journal_ISSN'),
-                'Journal_Publisher': row.get('Journal_Publisher'),
-                'PublicationDate': publication_date,
-                'PublicationYear': row.get('PublicationYear', ''),
-                'SubmissionDate': submission_date,
-                'IssueDate': issue_date,
-                'Volume': row.get('Volume') or 'missing data',
-                'Issue': row.get('Issue') or 'missing data',
-                'License_URL': row.get('License_URL'),
-                'License_Type': row.get('License_Type'),
-                'DOI': row.get('DOI'),
-                'Citation_Date': raw_citation,
+                'Journal_Title':    row.get('Journal_Title'),
+                'Journal_ISSN':     row.get('Journal_ISSN'),
+                'Journal_Publisher':row.get('Journal_Publisher'),
+                'PublicationDate':  row.get('PublicationDate',''),
+                'PublicationYear':  row.get('PublicationYear',''),
+                'SubmissionDate':   row.get('SubmissionDate',''),
+                'IssueDate':        row.get('IssueDate',''),
+                'Volume':           row.get('Volume') or 'missing data',
+                'Issue':            row.get('Issue')  or 'missing data',
+                'Pages':            f"{row.get('First_Page','')}-{row.get('Last_Page','')}'.strip('-')",
+                'DOI':              row.get('DOI'),
+                'Citation_Date':    raw_cit,
                 'DatePublishedISO': date_iso,
-                'Pages': f"{row.get('First_Page','')}-{row.get('Last_Page','')}".strip('-'),
-                'Full_Text_HTML_URL': row.get('Full_Text_HTML_URL'),
-                'PDF_URL': row.get('PDF_URL'),
-                'Full_Text_XML_URL': row.get('Full_Text_XML_URL'),
-                'Authors': authors_list,
-                'Article_Type': row.get('Article_Type'),
-                'References': references_list
+                'Full_Text_HTML_URL':row.get('Full_Text_HTML_URL'),
+                'PDF_URL':          row.get('PDF_URL'),
+                'Full_Text_XML_URL':row.get('Full_Text_XML_URL'),
+                'License_URL':      row.get('License_URL'),
+                'License_Type':     row.get('License_Type'),
+                'Authors':          authors_list,
+                'Article_Type':     row.get('Article_Type'),
+                'References':       references_list
             }
 
-            # Language sections
-            languages = []
+            # Multilingual sections
+            langs = []
             for lg in LANGUAGES:
-                languages.append({
-                    'lang': lg,
-                    'title': get_field(row, 'Title', lg) or 'missing data',
-                    'abstract': get_field(row, 'Abstract', lg) or 'missing data',
-                    'keywords': get_field(row, 'Keywords', lg) or 'missing data'
+                langs.append({
+                    'lang':     lg,
+                    'title':    get_field(row, 'Title', lg)   or 'missing data',
+                    'abstract': get_field(row, 'Abstract', lg)or 'missing data',
+                    'keywords': get_field(row, 'Keywords', lg)or 'missing data'
                 })
 
+            # Construct URLs
+            path         = f"{year}/{vol}/{issue}/{filename}"
+            mirror_url   = f"{MIRROR_BASE}/{path}"
+            original_url = f"{ORIGINAL_BASE}/{aid}"
+
             context = {
-                'journal': JOURNAL_META,
-                'general': general,
-                'languages': languages,
-                'article_id': aid
+                'journal':       JOURNAL_META,
+                'general':       general,
+                'languages':     langs,
+                'article_id':    aid,
+                'path':          path,
+                'mirror_url':    mirror_url,
+                'original_url':  original_url
             }
 
-            rendered = template.render(context)
+            html = template.render(context)
             with open(outfile, 'w', encoding='utf-8') as f:
-                f.write(rendered)
+                f.write(html)
             print(f"Generata: {outfile}")
             count += 1
+
     print(f"Totale: {count} pagine generate in '{OUTPUT_DIR}'.")
 
 if __name__ == '__main__':
