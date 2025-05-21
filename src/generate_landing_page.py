@@ -148,17 +148,25 @@ def generate_pages():
             except:
                 date_iso = f"{raw_cit}T00:00:00+01:00"
 
-            # Build path parts
+            # Build path parts, omitting empty‐issue directories
             title_en = get_field(row, 'Title', 'en')
             slug     = slugify(title_en)
             year     = row.get('PublicationYear', 'unknown-year')
             vol      = row.get('Volume', '0')
-            issue    = row.get('Issue', '0')
-            subdir   = os.path.join(OUTPUT_DIR, year, vol, issue)
-            os.makedirs(subdir, exist_ok=True)
+            issue    = row.get('Issue', '').strip()
             filename = f"{aid}-{slug}.html"
-            outfile  = os.path.join(subdir, filename)
-            rel_path = f"{year}/{vol}/{issue}/{filename}"
+
+            if issue:
+                # has an issue → year/vol/issue/… 
+                subdir   = os.path.join(OUTPUT_DIR, year, vol, issue)
+                rel_path = f"{year}/{vol}/{issue}/{filename}"
+            else:
+                # no issue → just year/vol/…
+                subdir   = os.path.join(OUTPUT_DIR, year, vol)
+                rel_path = f"{year}/{vol}/{filename}"
+
+            os.makedirs(subdir, exist_ok=True)
+            outfile = os.path.join(subdir, filename)
 
             # Parse lists
             authors_list    = parse_authors(row.get('Authors_Detail','[]'))
