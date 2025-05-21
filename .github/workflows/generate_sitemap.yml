@@ -22,9 +22,9 @@ jobs:
       - name: Create output directory
         run: mkdir -p output
 
-- name: Copy existing site content into output
-  run: |
-    mkdir -p output
-    cp -r * output/
-    cp sitemap.xml output/
+      - name: Copy existing site content into output
+        run: |
+          mkdir -p output
+          cp -r * output/
+          cp sitemap.xml output/
 
