@@ -236,3 +236,6 @@ def generate_pages():
 
 if __name__ == '__main__':
     generate_pages()
+    # Call the sitemap generator after all pages are generated
+    import subprocess
+    subprocess.run(["python3", "generate_sitemap.py"])
