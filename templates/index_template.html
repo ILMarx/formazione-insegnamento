@@ -3,45 +3,76 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formazione & insegnamento: Archive</title>
+  <title>Formazione & insegnamento: Mirror Archive</title>
+  <!-- META: Mirror site notice -->
+  <meta name="description" content="This is a mirror archive of Formazione & insegnamento, created by the Publisher for the purpose of testing interaction between metadata and Open Access repositories such as OpenAIRE. All materials are released under CC BY 4.0.">
+  <meta name="robots" content="noindex, follow">
+  <meta name="author" content="Pensa MultiMedia Srl (until 2022); Authors (from 2022)">
+  <meta name="copyright" content="Pensa MultiMedia Srl (until 2022); Authors (from 2022)">
+  <meta name="license" content="CC BY 4.0">
+
   <style>
     body { font-family: sans-serif; padding: 2em; }
     h1, h2, h3 { margin-top: 1em; }
     ul { list-style: none; padding-left: 1em; }
     ul li { margin: 0.3em 0; }
+    .disclaimer, .legal { margin-top: 2em; font-size: 0.95em; color: #444; }
+    .disclaimer { border-top: 1px solid #ddd; padding-top: 1em; }
   </style>
 </head>
 <body>
   <header>
-    <h1>Formazione & insegnamento Archive</h1>
+    <h1>Formazione & insegnamento Mirror Archive</h1>
+    <p>
+      <strong>
+        This website is a mirror of the journal at
+        <a href="https://ojs.pensamultimedia.it/index.php/siref/" rel="noopener noreferrer" target="_blank">
+          https://ojs.pensamultimedia.it/index.php/siref/
+        </a>.
+        It is maintained by the Publisher for the sole purpose of testing metadata interaction with Open Access repositories (e.g., OpenAIRE).
+      </strong>
+    </p>
     <p>Browse by Year → Volume → Issue → Article</p>
   </header>
   <main>
-  {% for year, vols in archive.items()|sort(reverse=True) %}
-    <section>
-      <h2>{{ year }}</h2>
-      {% for vol, issues in vols.items()|sort %}
-      <h3>Volume {{ vol }}</h3>
-      <ul>
-        {% for issue, articles in issues.items()|sort %}
-        <li>
-          Issue {{ issue }}
-          <ul>
-            {% for art in articles %}
-            <li>
-              <a href="{{ art.path }}">{{ art.title_en }}</a>
-            </li>
-            {% endfor %}
-          </ul>
-        </li>
+    {% for year, vols in archive.items()|sort(reverse=True) %}
+      <section>
+        <h2>{{ year }}</h2>
+        {% for vol, issues in vols.items()|sort %}
+        <h3>Volume {{ vol }}</h3>
+        <ul>
+          {% for issue, articles in issues.items()|sort %}
+          <li>
+            Issue {{ issue }}
+            <ul>
+              {% for art in articles %}
+              <li>
+                <a href="{{ art.path }}">{{ art.title_en }}</a>
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+          {% endfor %}
+        </ul>
         {% endfor %}
-      </ul>
-      {% endfor %}
-    </section>
-  {% endfor %}
+      </section>
+    {% endfor %}
   </main>
   <footer>
-    <p>Last updated: {{ generated_at }}</p>
+    <div class="legal">
+      <p>
+        <strong>Copyright notice:</strong> Until 2022, the copyright for first publication belongs to Pensa MultiMedia Srl.  
+        From 2022 onwards, authors retain all rights to their articles.<br>
+        All materials published on this website are released under the <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> licence.
+      </p>
+    </div>
+    <div class="disclaimer">
+      <p>
+        <strong>Disclaimer:</strong> This is a mirror website intended only for repository and interoperability testing.  
+        It does <u>not</u> collect any identifying data on its users. For the official journal website, visit <a href="https://ojs.pensamultimedia.it/index.php/siref/" rel="noopener noreferrer" target="_blank">Formazione & insegnamento</a>.
+      </p>
+      <p>Last updated: {{ generated_at }}</p>
+    </div>
   </footer>
 </body>
 </html>
