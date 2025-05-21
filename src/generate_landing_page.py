@@ -16,12 +16,12 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # --- CONFIGURAZIONE ---
 # core data now lives at data/FI_DATABASE.csv in the repo
-DATA_CSV = os.path.join(SCRIPT_DIR, 'data', 'FI_DATABASE.csv')
-SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_CSV   = os.path.join(SCRIPT_DIR, 'data', 'FI_DATABASE.csv')
 TEMPLATE_DIR = os.path.join(SCRIPT_DIR, 'templates')
-TEMPLATE_FILE = 'landing_template.html'
 OUTPUT_DIR   = os.path.join(SCRIPT_DIR, 'output')
-LANGUAGES = ['en', 'it', 'fr', 'es', 'pt']
+TEMPLATE_FILE = 'landing_template.html'
+LANGUAGES = ['en','it','fr','es','pt']
 
 # Metadati periodico
 JOURNAL_META = {
