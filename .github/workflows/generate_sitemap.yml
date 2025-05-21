@@ -2,7 +2,7 @@ name: Generate Sitemap
 
 on:
   push:
-    branches: [main]
+    branches: [ci/landing-pages]
 
 jobs:
   build:
