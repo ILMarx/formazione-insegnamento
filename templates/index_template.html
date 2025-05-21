@@ -1,6 +1,3 @@
-from datetime import datetime
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,52 +45,3 @@ from datetime import datetime
   </footer>
 </body>
 </html>
-```
-
-### 2. Generator updates in `generate_landing_page.py`
-```diff
-@@ def generate_pages():
-     count = 0
-+    # Prepare a structure for homepage
-+    archive = {}
-     with open(DATA_CSV, newline='', encoding='utf-8-sig') as csvfile:
-@@ for raw in reader:
-         aid = row.get('ArticleID', '').strip()
-@@
-         # after computing outfile and context:
-
-         # Derive relative URL path (from OUTPUT_DIR)
--        outfile = os.path.join(subdir, filename)
-+        outfile = os.path.join(subdir, filename)
-         rel_path = os.path.relpath(outfile, OUTPUT_DIR).replace('\\', '/')
-
-         # collect for archive
--        count += 1
-+        archive.setdefault(general['PublicationYear'], {})
-+        archive[general['PublicationYear']].setdefault(general['Volume'], {})
-+        archive[general['PublicationYear']][general['Volume']].setdefault(general['Issue'], [])
-+        archive[general['PublicationYear']][general['Volume']][general['Issue']].append({
-+            'title_en': languages[0]['title'],
-+            'path': rel_path
-+        })
-+        count += 1
-@@
-     # After loop: render and write index.html
--    print(f"Totale: {count} pagine generate in '{OUTPUT_DIR}'.")
-+    # sort inner lists by title
-+    for year in archive:
-+      for vol in archive[year]:
-+        for issue in archive[year][vol]:
-+          archive[year][vol][issue].sort(key=lambda x: x['title_en'])
-+
-+    # render index
-+    idx_tmpl = env.get_template('index_template.html')
-+    rendered_idx = idx_tmpl.render(
-+        archive=archive,
-+        last_updated=datetime.now(gettz('Europe/Rome')).strftime('%Y-%m-%d %H:%M:%S %Z')
-+    )
-+    with open(os.path.join(OUTPUT_DIR, 'index.html'), 'w', encoding='utf-8') as f:
-+        f.write(rendered_idx)
-+    print(f"Homepage generated: {os.path.join(OUTPUT_DIR, 'index.html')}")
-+    print(f"Totale: {count} pagine generate in '{OUTPUT_DIR}'.")
-```
