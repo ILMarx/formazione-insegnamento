@@ -12,10 +12,21 @@
       line-height: 1.4;
     }
   </style>
+
+  {# derive year/vol/issue/slug path for mirror URL #}
+  {% set year = general.PublicationYear %}
+  {% set vol = general.Volume %}
+  {% set issue = general.Issue %}
+  {% set slug = languages[0].title | slugify %}
+  {% set filename = article_id ~ '-' ~ slug ~ '.html' %}
+  {% set path = year ~ '/' ~ vol ~ '/' ~ issue ~ '/' ~ filename %}
+  {% set mirror_url = 'https://formazione-insegnamento.eu/' ~ path %}
+
   <!-- Primary title in English -->
   <title>{{ languages[0].title }} | {{ journal.title }}</title>
   <meta name="description" content="{{ languages[0].abstract }}">
   <meta name="keywords" content="{{ languages[0].keywords }}">
+  <link rel="canonical" href="{{ mirror_url }}">
 
   <!-- Dublin Core multilingual -->
   {% for sec in languages %}
@@ -64,7 +75,7 @@
   <meta property="og:type" content="article">
   <meta property="og:title" content="{{ languages[0].title }}">
   <meta property="og:description" content="{{ languages[0].abstract }}">
-  <meta property="og:url" content="https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}">>
+  <meta property="og:url" content="https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}">
   <meta property="og:site_name" content="{{ journal.title }}">
   {% for sec in languages %}
     <meta property="og:locale:alternate" content="{{ sec.lang }}">
@@ -83,6 +94,7 @@
     <!-- Journal title in italic, slightly larger -->
     <p style="font-size:1.25em; font-style:italic; margin-top:0;">{{ journal.title }}</p>
     <p>ISSN: {{ journal.issn }} | Published: {{ general.Citation_Date }}T00:00:00+01:00</p>
+    <p><strong>Mirror URL:</strong> <a href="{{ mirror_url }}" target="_blank">{{ mirror_url }}</a></p>
   </header>
 
   <!-- Authors section -->
@@ -124,7 +136,6 @@
       <li><strong>License:</strong> <a href="{{ journal.license }}" target="_blank">{{ journal.license }}</a></li>
     </ul>
   </section>
-  </section>
 
   <!-- Language-specific metadata sections -->
   {% for sec in languages %}
@@ -143,6 +154,9 @@
       <p>{{ ref|safe }}</p>
     {% endfor %}
   </section>
+
+  <footer>
+    <small>Last updated: {{ general.DatePublishedISO }}</small>
+  </footer>
 </body>
-  <footer>{{ general.DatePublishedISO }}</footer>
 </html>
