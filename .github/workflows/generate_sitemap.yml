@@ -8,6 +8,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
+      - name: List files for debugging
+        run: ls -R
+    
       - name: Checkout repo
         uses: actions/checkout@v3
 
