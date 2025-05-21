@@ -22,9 +22,11 @@ jobs:
       - name: Create output directory
         run: mkdir -p output
 
-      - name: Copy existing site content into output
+      - name: Copy site files into output folder
         run: |
           mkdir -p output
-          cp -r * output/
+          shopt -s extglob
+          cp -r !(output) output/
           cp sitemap.xml output/
+
 
