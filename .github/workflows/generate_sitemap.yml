@@ -24,7 +24,7 @@ jobs:
           python-version: 3.x
 
       - name: Generate sitemap.xml
-        run: python3 ci/landing-pages/src/generate_sitemap.py
+        run: python3 src/generate_sitemap.py
 
       - name: Move sitemap.xml to output
         run: mv sitemap.xml output/
