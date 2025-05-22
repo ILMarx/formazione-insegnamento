@@ -1,33 +1,31 @@
 name: Update Sitemap
 
 on:
-  push:
-    branches: [gh-pages]
+  workflow_run:
+    workflows: ["Pages build and deployment"]
+    types:
+      - completed
 
 jobs:
   sitemap:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gh-pages
+      - name: Checkout the freshly-built gh-pages
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+          fetch-depth: 0               # needed for accurate <lastmod> dates
 
       - name: Generate sitemap.xml
-        uses: cicirello/generate-sitemap@v1
+        uses: cicirello/generate-sitemap@v2
         with:
-          base-url-path: https://formazione-insegnamento.eu/
+          base_url: https://formazione-insegnamento.eu
+          source_dir: ./              # point at the repo root which mirrors gh-pages
 
-      - name: Commit sitemap.xml
+      - name: Commit and push sitemap.xml
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add sitemap.xml
-          git diff --quiet --cached || git commit -m "chore: update sitemap.xml"
+          git diff --quiet --cached || git commit -m "ci: update sitemap.xml"
           git push origin gh-pages
