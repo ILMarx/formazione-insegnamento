@@ -1,8 +1,8 @@
-name: Update Sitemap
+name: Update Sitemap after Pages build
 
 on:
   workflow_run:
-    workflows: ["Pages build and deployment"]
+    workflows: ["Generate Landing Pages"]
     types:
       - completed
 
@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0               # needed for accurate <lastmod> dates
 
-      - name: Generate sitemap.xml
+      - name: Generate sitemap.xml with Python
         uses: cicirello/generate-sitemap@v2
         with:
           base_url: https://formazione-insegnamento.eu
