@@ -35,6 +35,12 @@ jobs:
           python src/generate_landing_page.py
           echo "::set-output name=output-dir::output"
 
+      - name: Upload generated site
+        uses: actions/upload-artifact@v3
+        with:
+          name: site-output
+          path: output/
+
   sitemap:
     needs: build
     runs-on: ubuntu-latest
@@ -44,11 +50,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download generated site
+        uses: actions/download-artifact@v3
+        with:
+          name: site-output
+
       - name: Generate sitemap.xml
         uses: cicirello/generate-sitemap@v1.10.1
         with:
           base-url-path: "https://formazione-insegnamento.eu"
-          source-dir: "./output"
+          source-dir: "./site-output"
 
   deploy:
     needs: [build, sitemap]
@@ -59,11 +70,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download generated site
+        uses: actions/download-artifact@v3
+        with:
+          name: site-output
+
       - name: Prepare deployment directory
         run: |
           git rm -rf .
-          cp -r output/* .
-          [ -f output/CNAME ] && mv output/CNAME .
+          cp -r site-output/* .
+          [ -f site-output/CNAME ] && mv site-output/CNAME .
 
       - name: Disable Jekyll
         run: touch .nojekyll
