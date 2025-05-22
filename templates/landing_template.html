@@ -93,7 +93,7 @@
     <h1 style="font-size:2em; margin-bottom:0.2em;">{{ languages[0].title }}</h1>
     <!-- Journal title in italic, slightly larger -->
     <p style="font-size:1.25em; font-style:italic; margin-top:0;">{{ journal.title }}</p>
-    <p>eISSN: {{ journal.issn }} | Published: {{ general.Citation_Date }}T00:00:00+01:00</p>
+    <p>ISSN: {{ journal.issn }} | Published: {{ general.Citation_Date }}T00:00:00+01:00</p>
     <p><strong>Main Article Landing Page:</strong> <a href="https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}" target="_blank">https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}</a></p>
     <p><strong>Full Text HTML:</strong> {% if general.Full_Text_HTML_URL %}<a href="{{ general.Full_Text_HTML_URL }}" target="_blank">{{ general.Full_Text_HTML_URL }}</a>{% else %}missing data{% endif %}</p>
     <p><strong>Full Text PDF:</strong> {% if general.PDF_URL %}<a href="{{ general.PDF_URL }}" target="_blank">{{ general.PDF_URL }}</a>{% else %}missing data{% endif %}</p>
