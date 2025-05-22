@@ -94,7 +94,6 @@ def parse_references(ref_str):
         return []
 
 # Verify paths
-
 def verify_paths():
     if not os.path.isfile(DATA_CSV):
         print(f"Errore: CSV non trovato: {DATA_CSV}")
@@ -129,7 +128,7 @@ def generate_pages():
     verify_paths()
     init_template()
     count = 0
-    archive = {}  # {year: {vol: {issue: [ ... ] }}}
+    archive = {}  # {year: {vol: {issue: [ {title_en, path}, ...] }}}
 
     with open(DATA_CSV, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -147,32 +146,31 @@ def generate_pages():
             except:
                 date_iso = f"{raw_cit}T00:00:00+01:00"
 
-            # clean year
+            # Title slug and display
+            title_en = get_field(row, 'Title', 'en') or get_field(row, 'Title', 'it')
+            slug = (row.get('Slug') or slugify(title_en) or aid).strip()
+
+            # Year / Volume / Issue
             raw_year = row.get('PublicationYear','').strip()
             try:
                 year = str(int(float(raw_year)))
             except:
                 year = raw_year or 'unknown-year'
-            # compute volume from year
             try:
                 vol = str(int(year) - 2002)
             except:
                 raw_vol = row.get('Volume','').strip()
                 vol = raw_vol.replace(' ','-') if raw_vol else '0'
-            # issue
             raw_issue = row.get('Issue','').strip()
             issue = raw_issue.replace(' ','-') if raw_issue else '0'
 
-            # directories and paths (use the CSV’s Slug, not just the raw ID)
             volume_dir = f"{year}-{vol}"
-            issue_dir  = issue
-            slug       = (row.get('Slug') or aid).strip()
-            filename   = f"{slug}.html"
-            subdir = os.path.join(OUTPUT_DIR, volume_dir, issue_dir)
+            issue_dir = issue
+            filename = f"{slug}.html"
             rel_path = f"{volume_dir}/{issue_dir}/{filename}"
-
-            os.makedirs(subdir, exist_ok=True)
+            subdir = os.path.join(OUTPUT_DIR, volume_dir, issue_dir)
             outfile = os.path.join(subdir, filename)
+            os.makedirs(subdir, exist_ok=True)
 
             # Parse lists
             authors_list    = parse_authors(row.get('Authors_Detail','[]'))
@@ -202,14 +200,19 @@ def generate_pages():
                 'References':        references_list
             }
 
+            # Track archive structure
+            archive.setdefault(year, {}).setdefault(vol, {}).setdefault(issue, []).append(
+                {'title_en': title_en, 'path': rel_path}
+            )
+
             # Multilingual sections
             langs = []
             for lg in LANGUAGES:
                 langs.append({
-                    'lang':     lg,
-                    'title':    get_field(row, 'Title', lg)   or 'missing data',
-                    'abstract': get_field(row, 'Abstract', lg)or 'missing data',
-                    'keywords': get_field(row, 'Keywords', lg)or 'missing data'
+                    'lang': lg,
+                    'title': get_field(row, 'Title', lg) or 'missing data',
+                    'abstract': get_field(row, 'Abstract', lg) or 'missing data',
+                    'keywords': get_field(row, 'Keywords', lg) or 'missing data'
                 })
 
             context = {
@@ -217,6 +220,7 @@ def generate_pages():
                 'general':      general,
                 'languages':    langs,
                 'article_id':   aid,
+                'title_en':     title_en,
                 'path':         rel_path,
                 'mirror_url':   f"{MIRROR_BASE}/{rel_path}",
                 'original_url': f"{ORIGINAL_BASE}/{aid}"
@@ -234,9 +238,10 @@ def generate_pages():
         archive=archive,
         generated_at=datetime.now(gettz('Europe/Rome')).isoformat()
     )
-    with open(os.path.join(OUTPUT_DIR, 'index.html'), 'w', encoding='utf-8') as f:
+    idx_out = os.path.join(OUTPUT_DIR, 'index.html')
+    with open(idx_out, 'w', encoding='utf-8') as f:
         f.write(idx_html)
-    print("Generata: index.html")
+    print(f"Generata: {idx_out}")
 
     print(f"Totale: {count} pagine generate in '{OUTPUT_DIR}'.")
 
