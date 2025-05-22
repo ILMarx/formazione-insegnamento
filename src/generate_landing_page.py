@@ -11,6 +11,7 @@ import os, csv, sys, re, unicodedata, json
 from dateutil.parser import isoparse
 from dateutil.tz import gettz
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+import subprocess
 
 # === CONFIGURATION ===
 # script is in src/, repo root is one level up
@@ -120,7 +121,6 @@ def init_template():
     index_template = env.get_template(INDEX_TEMPLATE)
 
 # Helper per campi multilingua
-
 def get_field(row, base, lang=None):
     key = f"{base}_{lang}" if lang else base
     return (row.get(key, '') or '').strip()
@@ -157,18 +157,15 @@ def generate_pages():
             filename = f"{aid}-{slug}.html"
 
             if issue:
-                # has an issue → year/vol/issue/… 
                 subdir   = os.path.join(OUTPUT_DIR, year, vol, issue)
                 rel_path = f"{year}/{vol}/{issue}/{filename}"
             else:
-                # no issue → just year/vol/…
                 subdir   = os.path.join(OUTPUT_DIR, year, vol)
                 rel_path = f"{year}/{vol}/{filename}"
 
             os.makedirs(subdir, exist_ok=True)
             outfile = os.path.join(subdir, filename)
 
-            # Parse lists
             authors_list    = parse_authors(row.get('Authors_Detail','[]'))
             references_list = parse_references(row.get('References','[]'))
 
@@ -196,7 +193,6 @@ def generate_pages():
                 'References':        references_list
             }
 
-            # Multilingual sections
             langs = []
             for lg in LANGUAGES:
                 langs.append({
@@ -222,7 +218,6 @@ def generate_pages():
             print(f"Generata: {outfile}")
             count += 1
 
-    # Generate index.html (our goal)
     idx_html = index_template.render(
         journal=JOURNAL_META,
         archive=archive,
@@ -236,6 +231,6 @@ def generate_pages():
 
 if __name__ == '__main__':
     generate_pages()
-    # Call the sitemap generator after all pages are generated
-    import subprocess
-    subprocess.run(["python3", "generate_sitemap.py"])
+    # trigger sitemap generation
+    sitemap_script = os.path.join(SCRIPT_DIR, 'generate_sitemap.py')
+    subprocess.run(['python3', sitemap_script], cwd=REPO_ROOT, check=True)
