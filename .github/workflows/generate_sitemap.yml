@@ -8,20 +8,22 @@ jobs:
   sitemap:
     runs-on: ubuntu-latest
     steps:
-      # 1. Check out the full gh-pages branch (incl. history)
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           fetch-depth: 0
 
-      # 2. Generate sitemap.xml
-      - name: Generate sitemap.xml
-        uses: cicirello/generate-sitemap@v2
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          base-url: 'https://formazione-insegnamento.eu'
+          python-version: '3.x'
 
-      # 3. Commit & push only sitemap.xml
+      - name: Generate sitemap.xml
+        uses: cicirello/generate-sitemap@v1
+        with:
+          base-url-path: https://formazione-insegnamento.eu/
+
       - name: Commit sitemap.xml
         run: |
           git config user.name "github-actions"
