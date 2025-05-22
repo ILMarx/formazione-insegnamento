@@ -167,29 +167,38 @@
     <p>Browse by Year → Volume → Issue → Article</p>
   </header>
   <main>
-    {% for year, vols in archive.items()|sort(reverse=True) %}
-      <section>
-        <h2>{{ year }}</h2>
-        {% for vol, issues in vols.items()|sort %}
+  {% for year, vols in archive.items()|sort(reverse=True) %}
+    <section>
+      <h2>{{ year }}</h2>
+      {% for vol, issues in vols.items()|sort %}
         <h3>Volume {{ vol }}</h3>
         <ul>
           {% for issue, articles in issues.items()|sort %}
-          <li>
-            Issue {{ issue }}
-            <ul>
-              {% for art in articles %}
-              <li>
-                <a href="{{ art.path }}">{{ art.title_en }}</a>
-              </li>
-              {% endfor %}
-            </ul>
-          </li>
+            <li>
+              <strong>Issue {{ issue }}</strong>
+              <ul>
+                {# sort by our pre-computed sort key so roman/letter pages come first #}
+                {% for art in articles|sort(attribute='page_sort_key') %}
+                  <li>
+                    <a href="{{ art.path }}">{{ art.title_en }}</a><br/>
+                    <small>
+                      {% if art.authors %}
+                        <em>By {{ art.authors | join(', ') }}</em>{% if art.pages %}, {% endif %}
+                      {% endif %}
+                      {% if art.pages %}
+                        Pages: {{ art.pages }}
+                      {% endif %}
+                    </small>
+                  </li>
+                {% endfor %}
+              </ul>
+            </li>
           {% endfor %}
         </ul>
-        {% endfor %}
-      </section>
-    {% endfor %}
-  </main>
+      {% endfor %}
+    </section>
+  {% endfor %}
+</main>
   <footer>
     <div class="legal">
       <p>
