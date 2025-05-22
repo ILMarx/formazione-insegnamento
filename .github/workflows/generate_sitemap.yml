@@ -22,11 +22,11 @@ jobs:
       - name: Create output directory
         run: mkdir -p output
 
-      - name: Move sitemap.xml to output
-        run: mv sitemap.xml output/
+      - name: Copy site files into output folder
+        run: |
+          mkdir -p output
+          shopt -s extglob
+          cp -r !(output) output/
+          cp sitemap.xml output/
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./output
+
