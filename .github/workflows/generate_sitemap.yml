@@ -36,3 +36,4 @@ jobs:
           git add sitemap.xml
           git diff --quiet --cached || git commit -m "chore: update sitemap.xml"
           git push origin gh-pages
+          
