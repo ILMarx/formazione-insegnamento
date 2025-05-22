@@ -50,7 +50,7 @@ JOURNAL_META = {
 }
 
 # Base URLs
-MIRROR_BASE   = 'https://formazione-insegnamento.eu'
+tmpl_base     = 'https://formazione-insegnamento.eu'
 ORIGINAL_BASE = JOURNAL_META['url'] + '/article/view'
 
 # Utility to slugify text
@@ -129,7 +129,7 @@ def generate_pages():
     verify_paths()
     init_template()
     count = 0
-    archive = {}  # structure: {year: {vol: {issue: [ {title_en, path}, ...] }}}
+    archive = {}
 
     with open(data_csv, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -203,30 +203,20 @@ def generate_pages():
                 'References': refs_list
             }
 
-            # build archive index
-            archive.setdefault(year,{}).setdefault(vol,{}).setdefault(issue,[]).append(
-                {'title_en': title_en,'path': rel_path}
-            )
-
-            # multilingual sections
-            langs=[]
-            for lg in LANGUAGES:
-                langs.append({
-                    'lang': lg,
-                    'title': get_field(row,'Title',lg),
-                    'abstract': get_field(row,'Abstract',lg),
-                    'keywords': get_field(row,'Keywords',lg)
-                })
-
             # render article page
             context = {
                 'journal': JOURNAL_META,
                 'general': general,
-                'languages': langs,
+                'languages': [{
+                    'lang': lg,
+                    'title': get_field(row,'Title',lg),
+                    'abstract': get_field(row,'Abstract',lg),
+                    'keywords': get_field(row,'Keywords',lg)
+                } for lg in LANGUAGES],
                 'article_id': aid,
                 'title_en': title_en,
                 'path': rel_path,
-                'mirror_url': f"{MIRROR_BASE}/{rel_path}",
+                'mirror_url': f"{tmpl_base}/{rel_path}",
                 'original_url': f"{ORIGINAL_BASE}/{aid}"
             }
             html = template.render(context)
@@ -234,23 +224,24 @@ def generate_pages():
                 f.write(html)
             print(f"Generata: {out_file}")
             count += 1
+
+            # build archive entry with sorting
             first_page = row.get('First_Page','').strip()
-            # determine sort‐key: non‐numeric pages (roman/letters) first, then numeric
             if first_page.isdigit():
                 sort_key = (1, int(first_page))
             else:
-                sort_key = (0, first_page.lower() or '')  # empty or roman numerals
+                sort_key = (0, first_page.lower() or '')
 
             archive.setdefault(year, {}) \
-               .setdefault(vol, {}) \
-               .setdefault(issue, []) \
-               .append({
-                   'title_en': get_field(row, 'Title', 'en'),
-                   'path': rel_path,
-                   'authors': [a['name'] for a in authors_list if a.get('name')],
-                   'pages': general['Pages'],
-                   'page_sort_key': sort_key
-               })
+                   .setdefault(vol, {}) \
+                   .setdefault(issue or '0', []) \
+                   .append({
+                       'title_en': title_en,
+                       'path': rel_path,
+                       'authors': [a['name'] for a in authors_list if a.get('name')],
+                       'pages': general['Pages'],
+                       'page_sort_key': sort_key
+                   })
 
     # render index page
     idx_html = index_tmpl.render(
