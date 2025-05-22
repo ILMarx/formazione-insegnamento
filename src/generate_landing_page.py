@@ -234,7 +234,7 @@ def generate_pages():
 
             archive.setdefault(year, {}) \
                    .setdefault(vol, {}) \
-                   .setdefault(issue or '0', []) \
+                   .setdefault(issue, []) \
                    .append({
                        'title_en': title_en,
                        'path': rel_path,
