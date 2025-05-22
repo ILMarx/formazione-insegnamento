@@ -222,7 +222,7 @@ def generate_pages():
             print(f"Generata: {outfile}")
             count += 1
 
-    # Generate index.html
+    # Generate index.html (our goal)
     idx_html = index_template.render(
         journal=JOURNAL_META,
         archive=archive,
