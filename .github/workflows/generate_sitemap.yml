@@ -1,32 +1,38 @@
-name: Generate Sitemap
+name: Update Sitemap
 
+# 1. Run whenever gh-pages is updated
 on:
   push:
-    branches: [ci/landing-pages]
+    branches: [gh-pages]
 
 jobs:
-  build:
+  sitemap:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      # 2. Check out the gh-pages branch
+      - name: Checkout gh-pages
         uses: actions/checkout@v3
+        with:
+          ref: gh-pages
 
+      # 3. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: '3.x'
 
+      # 4. Generate sitemap.xml over the checked-out HTML
       - name: Generate sitemap.xml
-        run: python3 src/generate_sitemap.py
-
-      - name: Create output directory
-        run: mkdir -p output
-
-      - name: Copy site files into output folder
         run: |
-          mkdir -p output
-          shopt -s extglob
-          cp -r !(output) output/
-          cp sitemap.xml output/
+          # point the script at the current directory
+          SITE_ROOT="."
+          python3 src/generate_sitemap.py
 
-
+      # 5. Commit and push only sitemap.xml
+      - name: Commit sitemap.xml
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add sitemap.xml
+          git diff --quiet --cached || git commit -m "chore: update sitemap.xml"
+          git push origin gh-pages
