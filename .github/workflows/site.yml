@@ -11,8 +11,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      output-dir: ${{ steps.generate.outputs.output-dir }}
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -30,13 +28,10 @@ jobs:
           pip install jinja2 python-dateutil
 
       - name: Generate landing pages
-        id: generate
-        run: |
-          python src/generate_landing_page.py
-          echo "::set-output name=output-dir::output"
+        run: python src/generate_landing_page.py
 
       - name: Upload generated site
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2
         with:
           name: site-output
           path: output/
@@ -51,7 +46,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download generated site
-        uses: actions/download-artifact@v2.1.1
+        uses: actions/download-artifact@cbed621e49e4c01b044d60f6c80ea4ed6328b281
         with:
           name: site-output
 
@@ -71,7 +66,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download generated site
-        uses: actions/download-artifact@v2.1.1
+        uses: actions/download-artifact@cbed621e49e4c01b044d60f6c80ea4ed6328b281
         with:
           name: site-output
 
