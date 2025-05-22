@@ -1,0 +1,76 @@
+name: Build • Sitemap • Deploy
+
+on:
+  push:
+    branches:
+      - ci/landing-pages  # or main, if you publish from main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      output-dir: ${{ steps.generate.outputs.output-dir }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install jinja2 python-dateutil
+
+      - name: Generate landing pages
+        id: generate
+        run: |
+          python src/generate_landing_page.py
+          echo "::set-output name=output-dir::output"
+
+  sitemap:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate sitemap.xml
+        uses: cicirello/generate-sitemap@v1.10.1
+        with:
+          base-url-path: "https://formazione-insegnamento.eu"
+          source-dir: "./output"
+
+  deploy:
+    needs: [build, sitemap]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare deployment directory
+        run: |
+          git rm -rf .
+          cp -r output/* .
+          [ -f output/CNAME ] && mv output/CNAME .
+
+      - name: Disable Jekyll
+        run: touch .nojekyll
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: .
