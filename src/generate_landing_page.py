@@ -13,7 +13,7 @@ from dateutil.tz import gettz
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # === CONFIGURAZIONE ===
-# script is in src/, repo root is one level up
+# script is in src/, repo root is 1 level up
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT  = os.path.dirname(SCRIPT_DIR)
 
