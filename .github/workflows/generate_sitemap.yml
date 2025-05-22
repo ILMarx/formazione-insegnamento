@@ -19,7 +19,7 @@ jobs:
 
       - name: Generate sitemap.xml
         id: sitemap
-        uses: cicirello/generate-sitemap@v1.10.1
+        uses: cicirello/generate-sitemap@v1
         with:
           base_url: "https://formazione-insegnamento.eu"
           source_dir: "."   # your repo root is the gh-pages content
