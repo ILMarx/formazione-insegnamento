@@ -237,7 +237,7 @@ def generate_pages():
         f.write(idx_html)
     print("Generata: index.html")
 
-    print(f"Totale: {count} pagine generate in '{OUTPUT_DIR}'.”)
+    print(f"Totale: {count} pagine generate in '{OUTPUT_DIR}'.")
 
 if __name__ == '__main__':
     generate_pages()
