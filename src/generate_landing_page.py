@@ -228,6 +228,14 @@ def generate_pages():
             print(f"Generata: {outfile}")
             count += 1
 
+            archive.setdefault(year, {})\
+                    .setdefault(vol, {})\
+                    .setdefault(issue or '0', [])\
+                    .append({
+                        'title_en': title_en or get_field(row, 'Title', 'it'),
+                        'path':     rel_path
+                    })
+
     # Generate index.html
     idx_html = index_template.render(
         journal=JOURNAL_META,
