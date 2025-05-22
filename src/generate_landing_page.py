@@ -11,7 +11,6 @@ import os, csv, sys, re, unicodedata, json
 from dateutil.parser import isoparse
 from dateutil.tz import gettz
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-import subprocess
 
 # === CONFIGURATION ===
 # script is in src/, repo root is one level up
@@ -54,8 +53,7 @@ JOURNAL_META = {
 MIRROR_BASE   = 'https://formazione-insegnamento.eu'
 ORIGINAL_BASE = JOURNAL_META['url'] + '/article/view'
 
-# Utility: crea slug
-
+# Utility: crea slug (still available if needed)
 def slugify(text, max_length=60):
     text = unicodedata.normalize('NFKD', text)
     text = text.encode('ascii', 'ignore').decode('ascii')
@@ -80,6 +78,7 @@ def parse_authors(detail_str):
         ]
     except:
         return []
+
 
 def parse_references(ref_str):
     try:
@@ -130,7 +129,7 @@ def generate_pages():
     verify_paths()
     init_template()
     count = 0
-    archive = {}  # {year: {vol: {issue: [ {title, slug, path}, ...]}}}
+    archive = {}  # {year: {vol: {issue: [ ... ] }}}
 
     with open(DATA_CSV, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -148,24 +147,33 @@ def generate_pages():
             except:
                 date_iso = f"{raw_cit}T00:00:00+01:00"
 
-            # Build path parts, omitting empty‐issue directories
-            title_en = get_field(row, 'Title', 'en')
-            slug     = slugify(title_en)
-            year     = row.get('PublicationYear', 'unknown-year')
-            vol      = row.get('Volume', '0')
-            issue    = row.get('Issue', '').strip()
-            filename = f"{aid}-{slug}.html"
+            # clean year
+            raw_year = row.get('PublicationYear','').strip()
+            try:
+                year = str(int(float(raw_year)))
+            except:
+                year = raw_year or 'unknown-year'
+            # compute volume from year
+            try:
+                vol = str(int(year) - 2002)
+            except:
+                raw_vol = row.get('Volume','').strip()
+                vol = raw_vol.replace(' ','-') if raw_vol else '0'
+            # issue
+            raw_issue = row.get('Issue','').strip()
+            issue = raw_issue.replace(' ','-') if raw_issue else '0'
 
-            if issue:
-                subdir   = os.path.join(OUTPUT_DIR, year, vol, issue)
-                rel_path = f"{year}/{vol}/{issue}/{filename}"
-            else:
-                subdir   = os.path.join(OUTPUT_DIR, year, vol)
-                rel_path = f"{year}/{vol}/{filename}"
+            # directories and paths
+            volume_dir = f"{year}-{vol}"
+            issue_dir = issue
+            filename = f"{aid}.html"
+            subdir = os.path.join(OUTPUT_DIR, volume_dir, issue_dir)
+            rel_path = f"{volume_dir}/{issue_dir}/{filename}"
 
             os.makedirs(subdir, exist_ok=True)
             outfile = os.path.join(subdir, filename)
 
+            # Parse lists
             authors_list    = parse_authors(row.get('Authors_Detail','[]'))
             references_list = parse_references(row.get('References','[]'))
 
@@ -174,11 +182,11 @@ def generate_pages():
                 'Journal_ISSN':      row.get('Journal_ISSN'),
                 'Journal_Publisher': row.get('Journal_Publisher'),
                 'PublicationDate':   row.get('PublicationDate',''),
-                'PublicationYear':   row.get('PublicationYear',''),
+                'PublicationYear':   year,
                 'SubmissionDate':    row.get('SubmissionDate',''),
                 'IssueDate':         row.get('IssueDate',''),
-                'Volume':            row.get('Volume') or 'missing data',
-                'Issue':             row.get('Issue')  or 'missing data',
+                'Volume':            vol,
+                'Issue':             issue,
                 'Pages':             f"{row.get('First_Page','')}-{row.get('Last_Page','')}".strip('-'),
                 'DOI':               row.get('DOI'),
                 'Citation_Date':     raw_cit,
@@ -193,6 +201,7 @@ def generate_pages():
                 'References':        references_list
             }
 
+            # Multilingual sections
             langs = []
             for lg in LANGUAGES:
                 langs.append({
@@ -218,6 +227,7 @@ def generate_pages():
             print(f"Generata: {outfile}")
             count += 1
 
+    # Generate index.html
     idx_html = index_template.render(
         journal=JOURNAL_META,
         archive=archive,
@@ -231,6 +241,6 @@ def generate_pages():
 
 if __name__ == '__main__':
     generate_pages()
-    # trigger sitemap generation
-    sitemap_script = os.path.join(SCRIPT_DIR, 'generate_sitemap.py')
-    subprocess.run(['python3', sitemap_script], cwd=REPO_ROOT, check=True)
+    # Call the sitemap generator after all pages are generated
+    import subprocess
+    subprocess.run(["python3", "generate_sitemap.py"])
