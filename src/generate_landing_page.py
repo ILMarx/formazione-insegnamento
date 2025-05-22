@@ -163,10 +163,11 @@ def generate_pages():
             raw_issue = row.get('Issue','').strip()
             issue = raw_issue.replace(' ','-') if raw_issue else '0'
 
-            # directories and paths
+            # directories and paths (use the CSV’s Slug, not just the raw ID)
             volume_dir = f"{year}-{vol}"
-            issue_dir = issue
-            filename = f"{aid}.html"
+            issue_dir  = issue
+            slug       = (row.get('Slug') or aid).strip()
+            filename   = f"{slug}.html"
             subdir = os.path.join(OUTPUT_DIR, volume_dir, issue_dir)
             rel_path = f"{volume_dir}/{issue_dir}/{filename}"
 
