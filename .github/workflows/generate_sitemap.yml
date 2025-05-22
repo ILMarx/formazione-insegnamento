@@ -1,6 +1,5 @@
 name: Update Sitemap
 
-# 1️ Trigger whenever gh-pages is updated:
 on:
   push:
     branches: [gh-pages]
@@ -9,21 +8,20 @@ jobs:
   sitemap:
     runs-on: ubuntu-latest
     steps:
-      # 2️ Check out the full gh-pages branch (including history)
+      # 1. Check out the full gh-pages branch (incl. history)
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
-          fetch-depth: 0        # ← required for correct <lastmod> dates
+          fetch-depth: 0
 
-      # 3️ Run the cicirello sitemap generator over the checked-out HTML
+      # 2. Generate sitemap.xml
       - name: Generate sitemap.xml
         uses: cicirello/generate-sitemap@v2
         with:
           base-url: 'https://formazione-insegnamento.eu'
-          # (optionally) include-files: '**/*.html'
 
-      # 4️ Commit & push only the updated sitemap.xml
+      # 3. Commit & push only sitemap.xml
       - name: Commit sitemap.xml
         run: |
           git config user.name "github-actions"
