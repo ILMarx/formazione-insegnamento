@@ -14,17 +14,18 @@ jobs:
       - name: Checkout the freshly-built gh-pages
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0               # needed for accurate <lastmod> dates
+          ref: gh-pages           # ← make sure you’re on gh-pages, not main
+          fetch-depth: 0          # ← needed for correct <lastmod> dates
 
-      - name: Generate sitemap.xml with Python
-        uses: cicirello/generate-sitemap@v2
+      - name: Generate sitemap.xml
+        uses: cicirello/generate-sitemap@v3   # ← v2 isn’t published, v3 is the current release
         with:
-          base_url: https://formazione-insegnamento.eu
-          source_dir: ./              # point at the repo root which mirrors gh-pages
+          base_url: "https://formazione-insegnamento.eu"
+          source_dir: "."   # your repo root is the gh-pages content
 
       - name: Commit and push sitemap.xml
         run: |
-          git config user.name "github-actions"
+          git config user.name  "github-actions"
           git config user.email "github-actions@github.com"
           git add sitemap.xml
           git diff --quiet --cached || git commit -m "ci: update sitemap.xml"
