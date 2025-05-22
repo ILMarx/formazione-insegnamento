@@ -1,34 +1,19 @@
 name: Update Sitemap
 
-# 1. Run whenever gh-pages is updated
 on:
   push:
-    branches: [gh-pages]
+    branches: [gh-pages]   # fires whenever gh-pages is pushed
 
 jobs:
   sitemap:
     runs-on: ubuntu-latest
     steps:
-      # 2. Check out the gh-pages branch
       - name: Checkout gh-pages
         uses: actions/checkout@v3
         with:
           ref: gh-pages
-
-      # 3. Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      # 4. Generate sitemap.xml over the checked-out HTML
       - name: Generate sitemap.xml
-        run: |
-          # point the script at the current directory
-          SITE_ROOT="."
-          python3 src/generate_sitemap.py
-
-      # 5. Commit and push only sitemap.xml
+        uses: cicirello/generate-sitemap@v1   # official action for sitemaps :contentReference[oaicite:0]{index=0}
       - name: Commit sitemap.xml
         run: |
           git config user.name "github-actions"
@@ -36,4 +21,3 @@ jobs:
           git add sitemap.xml
           git diff --quiet --cached || git commit -m "chore: update sitemap.xml"
           git push origin gh-pages
-          
