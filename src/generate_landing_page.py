@@ -4,7 +4,7 @@ from dateutil.tz import gettz
 #!/usr/bin/env python3
 r"""
 generate_landing_page.py
-Genera landing page HTML dal database CSV in C:\dev\mirror_page_creator\output.
+Genera landing page HTML dal database CSV.
 Richiede: pip install jinja2 python-dateutil
 """
 import os, csv, sys, re, unicodedata, json
@@ -18,15 +18,15 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT  = os.path.dirname(SCRIPT_DIR)
 
 # now data/ and templates/ at repo root
-DATA_CSV      = os.path.join(REPO_ROOT, 'data', 'FI_DATABASE.csv')
-TEMPLATE_DIR  = os.path.join(REPO_ROOT, 'templates')
-TEMPLATE_FILE = 'landing_template.html'
-OUTPUT_DIR    = os.path.join(REPO_ROOT, 'output')
-INDEX_TEMPLATE = 'index_template.html'
+data_csv      = os.path.join(REPO_ROOT, 'data', 'FI_DATABASE.csv')
+template_dir  = os.path.join(REPO_ROOT, 'templates')
+template_file = 'landing_template.html'
+output_dir    = os.path.join(REPO_ROOT, 'output')
+index_template = 'index_template.html'
 
 LANGUAGES = ['en', 'it', 'fr', 'es', 'pt']
 
-# Metadati periodico
+# Journal metadata
 JOURNAL_META = {
     'title': 'Formazione & insegnamento',
     'alternative': 'Formazione e insegnamento',
@@ -49,11 +49,11 @@ JOURNAL_META = {
     'license': 'https://creativecommons.org/licenses/by/4.0'
 }
 
-# Base URLs for mirror and original
+# Base URLs
 MIRROR_BASE   = 'https://formazione-insegnamento.eu'
 ORIGINAL_BASE = JOURNAL_META['url'] + '/article/view'
 
-# Utility: crea slug (still available if needed)
+# Utility to slugify text
 def slugify(text, max_length=60):
     text = unicodedata.normalize('NFKD', text)
     text = text.encode('ascii', 'ignore').decode('ascii')
@@ -61,8 +61,7 @@ def slugify(text, max_length=60):
     text = re.sub(r'[^a-z0-9]+', '-', text)
     return text.strip('-')[:max_length]
 
-# Parsing JSON authors e references
-
+# Parse JSON authors
 def parse_authors(detail_str):
     try:
         authors = json.loads(detail_str)
@@ -79,78 +78,80 @@ def parse_authors(detail_str):
     except:
         return []
 
-
+# Parse JSON references
 def parse_references(ref_str):
     try:
         refs = json.loads(ref_str)
         processed = []
         for r in refs:
-            r_html = re.sub(r'(https?://[^\s]+)',
-                            lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>',
-                            r)
+            r_html = re.sub(
+                r'(https?://[^\s]+)',
+                lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>',
+                r
+            )
             processed.append(r_html)
         return processed
     except:
         return []
 
-# Verify paths
+# Verify input/output paths
 def verify_paths():
-    if not os.path.isfile(DATA_CSV):
-        print(f"Errore: CSV non trovato: {DATA_CSV}")
+    if not os.path.isfile(data_csv):
+        print(f"Errore: CSV non trovato: {data_csv}")
         sys.exit(1)
-    if not os.path.isdir(TEMPLATE_DIR):
-        print(f"Errore: template non trovato: {TEMPLATE_DIR}")
+    if not os.path.isdir(template_dir):
+        print(f"Errore: template non trovato: {template_dir}")
         sys.exit(1)
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
-# Init Jinja2
+# Initialize Jinja2 templates
 env = None
 template = None
-index_template = None
+index_tmpl = None
 
 def init_template():
-    global env, template, index_template
+    global env, template, index_tmpl
     env = Environment(
-        loader=FileSystemLoader(TEMPLATE_DIR),
-        autoescape=select_autoescape(['html', 'xml'])
+        loader=FileSystemLoader(template_dir),
+        autoescape=select_autoescape(['html','xml'])
     )
     env.filters['slugify'] = slugify
-    template = env.get_template(TEMPLATE_FILE)
-    index_template = env.get_template(INDEX_TEMPLATE)
+    template = env.get_template(template_file)
+    index_tmpl = env.get_template(index_template)
 
-# Helper per campi multilingua
+# Helper to fetch multi-language fields
 def get_field(row, base, lang=None):
     key = f"{base}_{lang}" if lang else base
     return (row.get(key, '') or '').strip()
 
-# Generazione pagine
+# Main page generation
 def generate_pages():
     verify_paths()
     init_template()
     count = 0
-    archive = {}  # {year: {vol: {issue: [ {title_en, path}, ...] }}}
+    archive = {}  # structure: {year: {vol: {issue: [ {title_en, path}, ...] }}}
 
-    with open(DATA_CSV, newline='', encoding='utf-8-sig') as csvfile:
+    with open(data_csv, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
         for raw in reader:
-            row = {k.strip().lstrip('\ufeff'): v for k, v in raw.items()}
-            aid = row.get('ArticleID', '').strip()
+            row = {k.strip(): v for k,v in raw.items()}
+            aid = row.get('ArticleID','').strip()
             if not aid:
                 continue
 
-            # Date handling
-            raw_cit = row.get('Citation_Date', '')
+            # parse dates
+            raw_cit = row.get('Citation_Date','')
             try:
                 dt = isoparse(raw_cit).replace(tzinfo=gettz('Europe/Rome'))
                 date_iso = dt.isoformat()
             except:
                 date_iso = f"{raw_cit}T00:00:00+01:00"
 
-            # Title slug and display
-            title_en = get_field(row, 'Title', 'en') or get_field(row, 'Title', 'it')
+            # title and slug
+            title_en = get_field(row,'Title','en') or get_field(row,'Title','it') or ''
             slug = (row.get('Slug') or slugify(title_en) or aid).strip()
 
-            # Year / Volume / Issue
+            # year, volume, issue
             raw_year = row.get('PublicationYear','').strip()
             try:
                 year = str(int(float(raw_year)))
@@ -160,90 +161,91 @@ def generate_pages():
                 vol = str(int(year) - 2002)
             except:
                 raw_vol = row.get('Volume','').strip()
-                vol = raw_vol.replace(' ','-') if raw_vol else '0'
+                vol = raw_vol.replace(' ','-') or '0'
             raw_issue = row.get('Issue','').strip()
-            issue = raw_issue.replace(' ','-') if raw_issue else '0'
+            issue = raw_issue.replace(' ','-') or '0'
 
-            volume_dir = f"{year}-{vol}"
+            # build dirs and paths
+            vol_dir = f"{year}-{vol}"
             issue_dir = issue
             filename = f"{slug}.html"
-            rel_path = f"{volume_dir}/{issue_dir}/{filename}"
-            subdir = os.path.join(OUTPUT_DIR, volume_dir, issue_dir)
-            outfile = os.path.join(subdir, filename)
-            os.makedirs(subdir, exist_ok=True)
+            rel_path = f"{vol_dir}/{issue_dir}/{filename}"
+            out_dir = os.path.join(output_dir,vol_dir,issue_dir)
+            os.makedirs(out_dir,exist_ok=True)
+            out_file = os.path.join(out_dir,filename)
 
-            # Parse lists
-            authors_list    = parse_authors(row.get('Authors_Detail','[]'))
-            references_list = parse_references(row.get('References','[]'))
+            # parse lists
+            authors_list = parse_authors(row.get('Authors_Detail','[]'))
+            refs_list    = parse_references(row.get('References','[]'))
 
+            # page metadata
             general = {
-                'Journal_Title':     row.get('Journal_Title'),
-                'Journal_ISSN':      row.get('Journal_ISSN'),
+                'Journal_Title': row.get('Journal_Title'),
+                'Journal_ISSN': row.get('Journal_ISSN'),
                 'Journal_Publisher': row.get('Journal_Publisher'),
-                'PublicationDate':   row.get('PublicationDate',''),
-                'PublicationYear':   year,
-                'SubmissionDate':    row.get('SubmissionDate',''),
-                'IssueDate':         row.get('IssueDate',''),
-                'Volume':            vol,
-                'Issue':             issue,
-                'Pages':             f"{row.get('First_Page','')}-{row.get('Last_Page','')}".strip('-'),
-                'DOI':               row.get('DOI'),
-                'Citation_Date':     raw_cit,
-                'DatePublishedISO':  date_iso,
-                'Full_Text_HTML_URL':row.get('Full_Text_HTML_URL'),
-                'PDF_URL':           row.get('PDF_URL'),
+                'PublicationDate': row.get('PublicationDate',''),
+                'PublicationYear': year,
+                'SubmissionDate': row.get('SubmissionDate',''),
+                'IssueDate': row.get('IssueDate',''),
+                'Volume': vol,
+                'Issue': issue,
+                'Pages': f"{row.get('First_Page','')}-{row.get('Last_Page','')}".strip('-'),
+                'DOI': row.get('DOI'),
+                'Citation_Date': raw_cit,
+                'DatePublishedISO': date_iso,
+                'Full_Text_HTML_URL': row.get('Full_Text_HTML_URL'),
+                'PDF_URL': row.get('PDF_URL'),
                 'Full_Text_XML_URL': row.get('Full_Text_XML_URL'),
-                'License_URL':       row.get('License_URL'),
-                'License_Type':      row.get('License_Type'),
-                'Authors':           authors_list,
-                'Article_Type':      row.get('Article_Type'),
-                'References':        references_list
+                'License_URL': row.get('License_URL'),
+                'License_Type': row.get('License_Type'),
+                'Authors': authors_list,
+                'Article_Type': row.get('Article_Type'),
+                'References': refs_list
             }
 
-            # Track archive structure
-            archive.setdefault(year, {}).setdefault(vol, {}).setdefault(issue, []).append(
-                {'title_en': title_en, 'path': rel_path}
+            # build archive index
+            archive.setdefault(year,{}).setdefault(vol,{}).setdefault(issue,[]).append(
+                {'title_en': title_en,'path': rel_path}
             )
 
-            # Multilingual sections
-            langs = []
+            # multilingual sections
+            langs=[]
             for lg in LANGUAGES:
                 langs.append({
                     'lang': lg,
-                    'title': get_field(row, 'Title', lg) or 'missing data',
-                    'abstract': get_field(row, 'Abstract', lg) or 'missing data',
-                    'keywords': get_field(row, 'Keywords', lg) or 'missing data'
+                    'title': get_field(row,'Title',lg),
+                    'abstract': get_field(row,'Abstract',lg),
+                    'keywords': get_field(row,'Keywords',lg)
                 })
 
+            # render article page
             context = {
-                'journal':      JOURNAL_META,
-                'general':      general,
-                'languages':    langs,
-                'article_id':   aid,
-                'title_en':     title_en,
-                'path':         rel_path,
-                'mirror_url':   f"{MIRROR_BASE}/{rel_path}",
+                'journal': JOURNAL_META,
+                'general': general,
+                'languages': langs,
+                'article_id': aid,
+                'title_en': title_en,
+                'path': rel_path,
+                'mirror_url': f"{MIRROR_BASE}/{rel_path}",
                 'original_url': f"{ORIGINAL_BASE}/{aid}"
             }
-
             html = template.render(context)
-            with open(outfile, 'w', encoding='utf-8') as f:
+            with open(out_file,'w',encoding='utf-8') as f:
                 f.write(html)
-            print(f"Generata: {outfile}")
+            print(f"Generata: {out_file}")
             count += 1
 
-    # Generate index.html
-    idx_html = index_template.render(
+    # render index page
+    idx_html = index_tmpl.render(
         journal=JOURNAL_META,
         archive=archive,
         generated_at=datetime.now(gettz('Europe/Rome')).isoformat()
     )
-    idx_out = os.path.join(OUTPUT_DIR, 'index.html')
-    with open(idx_out, 'w', encoding='utf-8') as f:
+    idx_file = os.path.join(output_dir,'index.html')
+    with open(idx_file,'w',encoding='utf-8') as f:
         f.write(idx_html)
-    print(f"Generata: {idx_out}")
-
-    print(f"Totale: {count} pagine generate in '{OUTPUT_DIR}'.")
+    print(f"Generata: {idx_file}")
+    print(f"Totale: {count} pagine generate in '{output_dir}'.")
 
 if __name__ == '__main__':
     generate_pages()
