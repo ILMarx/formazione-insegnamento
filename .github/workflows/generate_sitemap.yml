@@ -2,33 +2,30 @@ name: Update Sitemap
 
 on:
   push:
-    branches: [ main ]   # or [ ci/landing-pages ]
+    branches: [gh-pages]
 
 jobs:
   sitemap:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
+      # 1. Check out the full gh-pages branch (incl. history)
+      - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
+          ref: gh-pages
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
+      # 2. Generate sitemap.xml
       - name: Generate sitemap.xml
-        run: python3 src/generate_sitemap.py
+        uses: cicirello/generate-sitemap@v2
+        with:
+          base-url: 'https://formazione-insegnamento.eu'
 
-      - name: Commit & push to gh-pages
+      # 3. Commit & push only sitemap.xml
+      - name: Commit sitemap.xml
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          # fetch the gh-pages branch
-          git fetch origin gh-pages:gh-pages
-          git checkout gh-pages
-          mv sitemap.xml ./          # move root
           git add sitemap.xml
-          git diff --quiet --cached || git commit -m "chore: update sitemap"
+          git diff --quiet --cached || git commit -m "chore: update sitemap.xml"
           git push origin gh-pages
