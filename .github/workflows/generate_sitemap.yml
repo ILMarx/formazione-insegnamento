@@ -2,18 +2,28 @@ name: Update Sitemap
 
 on:
   push:
-    branches: [gh-pages]   # fires whenever gh-pages is pushed
+    branches:
+      - gh-pages
 
 jobs:
-  sitemap:
+  build:
     runs-on: ubuntu-latest
     steps:
+      # 1) Checkout the gh-pages branch with full history
       - name: Checkout gh-pages
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: gh-pages
-      - name: Generate sitemap.xml
-        uses: cicirello/generate-sitemap@v1   # official action for sitemaps :contentReference[oaicite:0]{index=0}
+          fetch-depth: 0
+
+      # 2) Generate sitemap.xml using Cicirello’s action
+      - name: Generate sitemap
+        uses: cicirello/generate-sitemap@v1
+        with:
+          site_root: '.'                                    # look at the root of gh-pages
+          base_url: https://formazione-insegnamento.eu      # your mirror URL
+
+      # 3) Commit & push only sitemap.xml back to gh-pages
       - name: Commit sitemap.xml
         run: |
           git config user.name "github-actions"
