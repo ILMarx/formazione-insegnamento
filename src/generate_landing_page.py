@@ -234,6 +234,23 @@ def generate_pages():
                 f.write(html)
             print(f"Generata: {out_file}")
             count += 1
+            first_page = row.get('First_Page','').strip()
+            # determine sort‐key: non‐numeric pages (roman/letters) first, then numeric
+            if first_page.isdigit():
+                sort_key = (1, int(first_page))
+            else:
+                sort_key = (0, first_page.lower() or '')  # empty or roman numerals
+
+            archive.setdefault(year, {}) \
+               .setdefault(vol, {}) \
+               .setdefault(issue, []) \
+               .append({
+                   'title_en': get_field(row, 'Title', 'en'),
+                   'path': rel_path,
+                   'authors': [a['name'] for a in authors_list if a.get('name')],
+                   'pages': general['Pages'],
+                   'page_sort_key': sort_key
+               })
 
     # render index page
     idx_html = index_tmpl.render(
