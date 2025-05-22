@@ -36,7 +36,7 @@ jobs:
           echo "::set-output name=output-dir::output"
 
       - name: Upload generated site
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: site-output
           path: output/
@@ -51,7 +51,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download generated site
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v2.1.1
         with:
           name: site-output
 
@@ -71,7 +71,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download generated site
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v2.1.1
         with:
           name: site-output
 
