@@ -44,6 +44,10 @@ jobs:
         run: |
           if [ -f CNAME ]; then cp CNAME output/CNAME; fi
 
+      - name: Copy robots.txt to output
+        run: |
+          if [ -f robots.txt ]; then cp robots.txt output/robots.txt; fi
+
       - name: Disable Jekyll
         run: touch output/.nojekyll
 
