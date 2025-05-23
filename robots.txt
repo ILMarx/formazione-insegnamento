@@ -1,0 +1,17 @@
+# robots.txt for formazione-insegnamento.eu
+# This mirror archive site welcomes all indexers, crawlers, and scrapers.
+# All content is open for discovery, repository testing, and metadata harvesting.
+# For any questions, contact: formazione.insegnamento@pensamultimedia.it
+
+User-agent: *
+Allow: /
+
+# Sitemap (if you have one)
+Sitemap: https://formazione-insegnamento.eu/sitemap.xml
+
+# OAI-PMH endpoint for harvesters and repositories
+OAI: https://formazioneinsegnamento.pythonanywhere.com/oai
+
+# Additional info for transparency
+# This is a repository/interoperability mirror, not the official journal website.
+# Official site: https://ojs.pensamultimedia.it/index.php/siref/
