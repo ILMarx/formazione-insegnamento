@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -30,58 +30,27 @@ jobs:
       - name: Generate landing pages
         run: python src/generate_landing_page.py
 
-      - name: Upload generated site
-        uses: actions/upload-artifact@v2
-        with:
-          name: site-output
-          path: output/
-
-  sitemap:
-    needs: build
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Download generated site
-        uses: actions/download-artifact@v2
-        with:
-          name: site-output
-
       - name: Generate sitemap.xml
         uses: cicirello/generate-sitemap@v1.10.1
         with:
           base-url-path: "https://formazione-insegnamento.eu"
-          source-dir: "./site-output"
+          source-dir: "output"
 
-  deploy:
-    needs: [build, sitemap]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Download generated site
-        uses: actions/download-artifact@v2
-        with:
-          name: site-output
-
-      - name: Prepare deployment directory
+      - name: Copy sitemap to output root
         run: |
-          git rm -rf .
-          cp -r site-output/* .
-          [ -f site-output/CNAME ] && mv site-output/CNAME .
+          mv sitemap.xml output/
+
+      - name: Copy CNAME to output/ (if using a custom domain)
+        run: |
+          if [ -f CNAME ]; then cp CNAME output/CNAME; fi
 
       - name: Disable Jekyll
-        run: touch .nojekyll
+        run: touch output/.nojekyll
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: .
+          publish_dir: ./output
+          # keep_files: true  # optional; enables incremental updates
