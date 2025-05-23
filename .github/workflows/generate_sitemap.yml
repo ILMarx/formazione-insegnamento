@@ -16,8 +16,8 @@ jobs:
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
-          ref: gh-pages        # ensure we’re on gh‑pages
-          fetch-depth: 0       # needed for correct <lastmod> dates
+          ref: gh-pages
+          fetch-depth: 0
 
       # 2. Generate sitemap.xml using the latest action (v1.10.1)
       - name: Generate sitemap.xml
@@ -27,7 +27,7 @@ jobs:
           base-url-path: "https://formazione-insegnamento.eu"
           source-dir: "."      # scan from repo root
 
-      # 3. Commit & push only the updated sitemap.xml back to gh‑pages
+      # 3. Commit & push only the updated sitemap.xml back to gh-pages
       - name: Commit & push sitemap.xml
         run: |
           git config user.name  "github-actions"
