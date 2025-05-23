@@ -133,7 +133,7 @@
   }
   </script>
 
-  <!-- RSS/ATOM/Stylesheets (optional: keep or remove as you wish) -->
+  <!-- RSS/ATOM/Stylesheets -->
   <link rel="alternate" type="application/atom+xml" href="https://ojs.pensamultimedia.it/index.php/siref/gateway/plugin/WebFeedGatewayPlugin/atom">
   <link rel="alternate" type="application/rdf+xml" href="https://ojs.pensamultimedia.it/index.php/siref/gateway/plugin/WebFeedGatewayPlugin/rss">
   <link rel="alternate" type="application/rss+xml" href="https://ojs.pensamultimedia.it/index.php/siref/gateway/plugin/WebFeedGatewayPlugin/rss2">
@@ -143,6 +143,9 @@
   <link rel="stylesheet" href="https://ojs.pensamultimedia.it/public/journals/6/styleSheet.css?d=" type="text/css" />
   <link rel="stylesheet" href="https://ojs.pensamultimedia.it/public/site/styleSheet.css?v=3.3.0.14" type="text/css" />
 
+  # OAI-PMH instructions for robots
+  <link rel="service" type="application/oai-pmh+xml" title="OAI-PMH endpoint" href="https://formazioneinsegnamento.pythonanywhere.com/oai">
+  
   <style>
     body { font-family: sans-serif; padding: 2em; }
     h1, h2, h3 { margin-top: 1em; }
@@ -167,29 +170,38 @@
     <p>Browse by Year → Volume → Issue → Article</p>
   </header>
   <main>
-    {% for year, vols in archive.items()|sort(reverse=True) %}
-      <section>
-        <h2>{{ year }}</h2>
-        {% for vol, issues in vols.items()|sort %}
+  {% for year, vols in archive.items()|sort(reverse=True) %}
+    <section>
+      <h2>{{ year }}</h2>
+      {% for vol, issues in vols.items()|sort %}
         <h3>Volume {{ vol }}</h3>
         <ul>
           {% for issue, articles in issues.items()|sort %}
-          <li>
-            Issue {{ issue }}
-            <ul>
-              {% for art in articles %}
-              <li>
-                <a href="{{ art.path }}">{{ art.title_en }}</a>
-              </li>
-              {% endfor %}
-            </ul>
-          </li>
+            <li>
+              <strong>Issue {{ issue }}</strong>
+              <ul>
+                {# sort by our pre-computed sort key so roman/letter pages come first #}
+                {% for art in articles|sort(attribute='page_sort_key') %}
+                  <li>
+                    <a href="{{ art.path }}">{{ art.title_en }}</a><br/>
+                    <small>
+                      {% if art.authors %}
+                        <em>By {{ art.authors | join(', ') }}</em>{% if art.pages %}, {% endif %}
+                      {% endif %}
+                      {% if art.pages %}
+                        Pages: {{ art.pages }}
+                      {% endif %}
+                    </small>
+                  </li>
+                {% endfor %}
+              </ul>
+            </li>
           {% endfor %}
         </ul>
-        {% endfor %}
-      </section>
-    {% endfor %}
-  </main>
+      {% endfor %}
+    </section>
+  {% endfor %}
+</main>
   <footer>
     <div class="legal">
       <p>

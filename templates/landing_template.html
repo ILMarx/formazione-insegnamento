@@ -11,7 +11,7 @@
 
   <meta name="mirror-site" content="This is a repository/interoperability mirror, not the official journal website. See https://ojs.pensamultimedia.it/index.php/siref/">
 
-  <!-- Primary title in English -->
+  <!-- Primary title in English (primary language of the journal) -->
   <title>{{ languages[0].title }} | {{ journal.title }} (Mirror Archive)</title>
   <meta name="description" content="{{ languages[0].abstract }}">
   <meta name="keywords" content="{{ languages[0].keywords }}">
@@ -109,6 +109,8 @@
   <meta name="twitter:title" content="{{ languages[0].title }}">
   <meta name="twitter:description" content="{{ languages[0].abstract }}">
 
+  <link rel="service" type="application/oai-pmh+xml" title="OAI-PMH endpoint" href="https://formazioneinsegnamento.pythonanywhere.com/oai">
+  
   <style>
     /* Compact hanging indent for references */
     #references p {
@@ -179,7 +181,7 @@
     </ul>
   </section>
 
-  <!-- Language-specific metadata sections -->
+  <!-- Language-specific metadata sections, which we like -->
   {% for sec in languages %}
   <section lang="{{ sec.lang }}">
     <h2>Metadata ({{ sec.lang.upper() }})</h2>
