@@ -185,7 +185,7 @@ def generate_pages():
                 'Journal_Publisher': row.get('Journal_Publisher'),
                 'PublicationDate': row.get('PublicationDate',''),
                 'PublicationYear': year,
-                'SubmissionDate': row.get('SubmissionDate','',''),
+                'SubmissionDate': row.get('SubmissionDate',''),   # <-- FIXED HERE
                 'IssueDate': row.get('IssueDate',''),
                 'Volume': vol,
                 'Issue': issue,
