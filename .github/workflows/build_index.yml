@@ -1,33 +1,36 @@
 name: Build & Deploy Index Page
 
-# 1. fire after your sitemap‐update workflow succeeds
 on:
   workflow_run:
     workflows: ["Update Sitemap after Generate Landing Pages build"]
-    types: [ completed ]
+    types: [completed]
+
+permissions:
+  contents: write
 
 jobs:
   build-index:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      # 2. check out the live gh-pages branch
+      # 1. Check out the live gh-pages branch
       - name: Checkout gh-pages
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: gh-pages
           fetch-depth: 0
 
-      # 3. run your landing‐page generator (which now also writes index.html)
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
+      # 3. Generate all pages + index
       - name: Generate all pages + index
         run: python3 src/generate_landing_page.py
 
-      # 4. commit & push the new index.html back to gh-pages
+      # 4. Commit & push the new index.html back to gh-pages
       - name: Commit & push index.html
         run: |
           git config user.name  "github-actions"
@@ -35,4 +38,3 @@ jobs:
           git add output/index.html
           git diff --quiet --cached || git commit -m "ci: update index page"
           git push origin gh-pages
-
