@@ -59,20 +59,31 @@ def slugify(text, max_length=60):
 def parse_authors(detail_str):
     try:
         authors = json.loads(detail_str)
-        return [{
-            'name': a.get('name'),
-            'affiliation': a.get('affiliation'),
-            'orcid': a.get('orcid'),
-            'email': a.get('email'),
-            'country': a.get('country')
-        } for a in authors]
+        return [
+            {
+                'name': a.get('name'),
+                'affiliation': a.get('affiliation'),
+                'orcid': a.get('orcid'),
+                'email': a.get('email'),
+                'country': a.get('country')
+            }
+            for a in authors
+        ]
     except:
         return []
 
 def parse_references(ref_str):
     try:
         refs = json.loads(ref_str)
-        return [re.sub(r'(https?://[^\s]+)', lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>', r) for r in refs]
+        processed = []
+        for r in refs:
+            r_html = re.sub(
+                r'(https?://[^\s]+)',
+                lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>',
+                r
+            )
+            processed.append(r_html)
+        return processed
     except:
         return []
 
@@ -112,13 +123,23 @@ def generate_pages():
 
     with open(data_csv, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
+        all_rows = [dict((k.strip(), v) for k, v in row.items()) for row in reader]
+
+        def safe_int(val):
+            try: return int(val)
+            except: return 0
+
+        def first_page_sort(val):
+            matches = re.findall(r'\d+', val)
+            return int(matches[0]) if matches else 0
+
         rows = sorted(
-            [dict((k.strip(), v) for k, v in row.items()) for row in reader],
+            all_rows,
             key=lambda r: (
-                int(r.get('PublicationYear', 0) or 0),
-                int(r.get('Volume', 0) or 0),
-                int(r.get('Issue', 0) or 0),
-                int(re.findall(r'\d+', r.get('First_Page', '0'))[0] or 0)
+                safe_int(r.get('PublicationYear', '0')),
+                safe_int(r.get('Volume', '0')),
+                safe_int(r.get('Issue', '0')),
+                first_page_sort(r.get('First_Page', '0'))
             )
         )
 
