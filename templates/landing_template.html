@@ -18,6 +18,7 @@
   <meta name="journal_publisher" content="{{ journal.publisher }}">
   <meta name="journal_editor" content="{{ journal.editor }}">
   <meta name="journal_director" content="{{ journal.director }}">
+  <meta name="journal_founder" content="Umberto Margiotta">
   <meta name="journal_issn" content="{{ journal.issn }}">
   <meta name="journal_issn_l" content="{{ journal.issn_l }}">
   <meta name="journal_url" content="{{ journal.url }}">
@@ -94,7 +95,7 @@
   <meta property="og:title" content="{{ languages[0].title }}">
   <meta property="og:description" content="{{ languages[0].abstract }}">
   <meta property="og:url" content="{{ mirror_url }}">
-  <meta property="og:site_name" content="{{ journal.title }} (Indexing Archive)">
+  <meta property="og:site_name" content="{{ journal.title }} (Alternate Archive)">
   {% for sec in languages %}
     <meta property="og:locale:alternate" content="{{ sec.lang }}">
   {% endfor %}
@@ -114,7 +115,6 @@
       padding-left: 1in;
       line-height: 1.4;
     }
- <style>
     body {
       font-family: "Noto Sans", sans-serif;
       padding: 2.5em;
@@ -177,6 +177,9 @@
       color: #666;
     }
   </style>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
+
 </head>
 <body>
   <header>
@@ -194,7 +197,7 @@
     <p><strong>Full Text HTML (file):</strong> {% if general.HTML_URL_File %}<a href="{{ general.HTML_URL_File }}" target="_blank">{{ general.HTML_URL_File }}</a>{% else %}missing data{% endif %}</p>
     <p><strong>Full Text PDF (file):</strong> {% if general.PDF_URL_File %}<a href="{{ general.PDF_URL_File }}" target="_blank">{{ general.PDF_URL_File }}</a>{% else %}missing data{% endif %}</p>
     <p><strong>Full Text XML:</strong> {% if general.Full_Text_XML_URL %}<a href="{{ general.Full_Text_XML_URL }}" target="_blank">{{ general.Full_Text_XML_URL }}</a>{% else %}missing data{% endif %}</p>
-    <p><strong>Mirror URL:</strong> <a href="{{ mirror_url }}" target="_blank">{{ mirror_url }}</a></p>
+    <p><strong>Alternate URL:</strong> <a href="{{ mirror_url }}" target="_blank">{{ mirror_url }}</a></p>
   </section>
 
   <section class="box">
