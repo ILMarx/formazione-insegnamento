@@ -1,23 +1,17 @@
 <!DOCTYPE html>
 <html lang="{{ journal.language }}">
 <head>
-  <!--
-    THIS IS A MIRROR/TESTING ARCHIVE, NOT THE OFFICIAL JOURNAL WEBSITE.
-    Official site: https://ojs.pensamultimedia.it/index.php/siref/
-    All metadata is for repository/discovery purposes ONLY.
-  -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="mirror-site" content="This is a repository/interoperability mirror, not the official journal website. See https://ojs.pensamultimedia.it/index.php/siref/">
+  <meta name="alternate-site" content="This is an officially curated alternate landing page for repository, SEO, and indexing purposes. Maintained by the Executive Editorial Office and Pensa MultiMedia.">
 
-  <!-- Primary title in English (primary language of the journal) -->
-  <title>{{ languages[0].title }} | {{ journal.title }} (Mirror Archive)</title>
+  <title>{{ languages[0].title }} | {{ journal.title }} (Alternate Landing Page)</title>
   <meta name="description" content="{{ languages[0].abstract }}">
   <meta name="keywords" content="{{ languages[0].keywords }}">
   <link rel="canonical" href="{{ mirror_url }}">
 
-  <!-- Journal-level metadata (harmonized with index.html) -->
+  <!-- Journal-level metadata -->
   <meta name="journal_title" content="{{ journal.title }}">
   <meta name="journal_abbrev" content="{{ journal.abbrev }}">
   <meta name="journal_alternative" content="{{ journal.alternative }}">
@@ -29,14 +23,12 @@
   <meta name="journal_url" content="{{ journal.url }}">
   <meta name="journal_license" content="{{ journal.license }}">
 
-  <!-- Dublin Core multilingual -->
   {% for sec in languages %}
     <meta name="DC.Title" xml:lang="{{ sec.lang }}" content="{{ sec.title }}">
     <meta name="DC.Description" xml:lang="{{ sec.lang }}" content="{{ sec.abstract }}">
     <meta name="DC.Subject" xml:lang="{{ sec.lang }}" content="{{ sec.keywords }}">
   {% endfor %}
 
-  <!-- Journal-level Dublin Core -->
   <meta name="DC.Publisher" content="{{ journal.publisher }}">
   <meta name="DC.Rights" content="CC BY 4.0">
   <meta name="DC.Identifier" content="{{ mirror_url }}">
@@ -45,13 +37,16 @@
   <meta name="DC.Language" content="{{ journal.language }}">
   <meta name="DC.Rights.Holder" content="Pensa MultiMedia (until 2022); Authors (from 2022)">
   <meta name="DC.Coverage" content="Italia; Europa; internazionale">
+  <meta name="DC.Date.issued" content="{{ general.IssueDate }}">
+  <meta name="DC.Date.available" content="{{ general.PublicationDate }}">
 
   <!-- JATS4R / Highwire -->
   <meta name="citation_title" content="{{ languages[0].title }}">
   {% for auth in general.Authors %}
     <meta name="citation_author" content="{{ auth.name }}">
   {% endfor %}
-  <meta name="citation_publication_date" content="{{ general.Citation_Date }}T00:00:00+01:00">
+  <meta name="citation_publication_date" content="{{ general.IssueDate }}T00:00:00+01:00">
+  <meta name="citation_online_date" content="{{ general.PublicationDate }}T00:00:00+01:00">
   <meta name="citation_journal_title" content="{{ journal.title }}">
   <meta name="citation_issn" content="{{ journal.issn }}">
   <meta name="citation_firstpage" content="{{ general.Pages.split('-')[0] }}">
@@ -63,7 +58,7 @@
     <meta name="citation_reference" content="{{ ref|striptags }}">
   {% endfor %}
 
-  <!-- JSON-LD Schema.org (mirror archive note) -->
+  <!-- JSON-LD Schema.org -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -74,7 +69,8 @@
       {% for auth in general.Authors %}{"@type": "Person", "name": "{{ auth.name }}", "url": "{{ auth.orcid }}"}{% if not loop.last %}, {% endif %}{% endfor %}
     ],
     "publisher": { "@type": "Organization", "name": "{{ journal.publisher }}" },
-    "datePublished": "{{ general.Citation_Date }}T00:00:00+01:00",
+    "datePublished": "{{ general.IssueDate }}T00:00:00+01:00",
+    "dateCreated": "{{ general.PublicationDate }}T00:00:00+01:00",
     "inLanguage": "{{ journal.language }}",
     "citation": [{% for ref in general.References %}"{{ ref|striptags }}"{% if not loop.last %}, {% endif %}{% endfor %}],
     "isAccessibleForFree": true,
@@ -86,8 +82,8 @@
     "additionalProperty": [
       {
         "@type": "PropertyValue",
-        "name": "mirror",
-        "value": "This is a repository/interoperability mirror, not the official journal website."
+        "name": "alternate",
+        "value": "This is an officially maintained alternate landing page by the Executive Editorial Office and Pensa MultiMedia."
       }
     ]
   }
@@ -110,9 +106,8 @@
   <meta name="twitter:description" content="{{ languages[0].abstract }}">
 
   <link rel="service" type="application/oai-pmh+xml" title="OAI-PMH endpoint" href="https://formazioneinsegnamento.pythonanywhere.com/oai">
-  
+
   <style>
-    /* Compact hanging indent for references */
     #references p {
       margin: 0.3em 0;
       text-indent: -1in;
@@ -123,37 +118,24 @@
 </head>
 <body>
   <header>
-    <!-- General page title -->
     <h1 style="font-size:2em; margin-bottom:0.2em;">{{ languages[0].title }}</h1>
-    <!-- Journal title in italic, slightly larger -->
     <p style="font-size:1.25em; font-style:italic; margin-top:0;">{{ journal.title }}</p>
-    <p>ISSN: {{ journal.issn }} | Published: {{ general.Citation_Date }}T00:00:00+01:00</p>
-    <p>
-      <strong>Main Article Landing Page:</strong>
-      <a href="https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}" target="_blank">
-        https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}
-      </a>
-    </p>
-    <p><strong>Full Text HTML:</strong></p>
+    <p>ISSN: {{ journal.issn }} | Published: {{ general.IssueDate }}T00:00:00+01:00</p>
+    <p><strong>Main Article Landing Page:</strong> <a href="https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}" target="_blank">https://ojs.pensamultimedia.it/index.php/siref/article/view/{{ article_id }}</a></p>
     <p><strong>Full Text HTML (viewer):</strong> {% if general.Full_Text_HTML_URL %}<a href="{{ general.Full_Text_HTML_URL }}" target="_blank">{{ general.Full_Text_HTML_URL }}</a>{% else %}missing data{% endif %}</p>
-    <p><strong>Full Text PDF:</strong></p>
     <p><strong>Full Text PDF (viewer):</strong> {% if general.PDF_URL %}<a href="{{ general.PDF_URL }}" target="_blank">{{ general.PDF_URL }}</a>{% else %}missing data{% endif %}</p>
+    <p><strong>Full Text HTML (file):</strong> {% if general.HTML_URL_File %}<a href="{{ general.HTML_URL_File }}" target="_blank">{{ general.HTML_URL_File }}</a>{% else %}missing data{% endif %}</p>
+    <p><strong>Full Text PDF (file):</strong> {% if general.PDF_URL_File %}<a href="{{ general.PDF_URL_File }}" target="_blank">{{ general.PDF_URL_File }}</a>{% else %}missing data{% endif %}</p>
     <p><strong>Full Text XML:</strong> {% if general.Full_Text_XML_URL %}<a href="{{ general.Full_Text_XML_URL }}" target="_blank">{{ general.Full_Text_XML_URL }}</a>{% else %}missing data{% endif %}</p>
     <p><strong>Mirror URL:</strong> <a href="{{ mirror_url }}" target="_blank">{{ mirror_url }}</a></p>
-    <p style="color:#666; font-size:0.95em; margin-top:1em;">
-      <strong>Disclaimer:</strong>
-      This landing page is part of a repository/interoperability mirror of <a href="https://ojs.pensamultimedia.it/index.php/siref/" target="_blank">Formazione &amp; insegnamento</a>.
-      It is not the official journal website.
-    </p>
+    <p style="color:#666; font-size:0.95em; margin-top:1em;"><strong>Disclaimer:</strong> This landing page is part of a repository/interoperability mirror of <a href="https://ojs.pensamultimedia.it/index.php/siref/" target="_blank">Formazione &amp; insegnamento</a>. It is not the official journal website.</p>
   </header>
 
-  <!-- Authors section -->
   <section id="authors">
     <h2>Authors</h2>
     <ul>
       {% for auth in general.Authors %}
-      <li>
-        <p><strong>{{ auth.name }}</strong></p>
+      <li><p><strong>{{ auth.name }}</strong></p>
         <ul>
           {% if auth.affiliation %}<li>Affiliation: {{ auth.affiliation }}</li>{% endif %}
           {% if auth.country %}<li>Country: {{ auth.country }}</li>{% endif %}
@@ -165,7 +147,6 @@
     </ul>
   </section>
 
-  <!-- General metadata section -->
   <section id="general-meta">
     <h2>General Metadata</h2>
     <ul>
@@ -173,17 +154,16 @@
       <li><strong>Publication Year:</strong> {{ general.PublicationYear or 'missing data' }}</li>
       <li><strong>Volume:</strong> {{ general.Volume or 'missing data' }}</li>
       <li><strong>Issue:</strong> {{ general.Issue or 'missing data' }}</li>
-      <li><strong>Publication Date:</strong> {{ general.PublicationDate or 'missing data' }}</li>
+      <li><strong>Available (Online First):</strong> {{ general.PublicationDate or 'missing data' }}</li>
+      <li><strong>Issued (Official Publication):</strong> {{ general.IssueDate or 'missing data' }}</li>
       <li><strong>Submission Date:</strong> {{ general.SubmissionDate or 'missing data' }}</li>
-      <li><strong>Issue Date:</strong> {{ general.IssueDate or 'missing data' }}</li>
       <li><strong>Pages:</strong> {{ general.Pages or 'missing data' }}</li>
-      <li><strong>Publication Date (online first):</strong> {{ general.DatePublishedISO or 'missing data' }}</li>
+      <li><strong>Publication Date (ISO):</strong> {{ general.DatePublishedISO or 'missing data' }}</li>
       <li><strong>DOI:</strong> {% if general.DOI %}<a href="https://doi.org/{{ general.DOI }}" target="_blank">{{ general.DOI }}</a>{% else %}missing data{% endif %}</li>
       <li><strong>License:</strong> <a href="{{ journal.license }}" target="_blank">{{ journal.license }}</a></li>
     </ul>
   </section>
 
-  <!-- Language-specific metadata sections, which we like -->
   {% for sec in languages %}
   <section lang="{{ sec.lang }}">
     <h2>Metadata ({{ sec.lang.upper() }})</h2>
@@ -193,7 +173,6 @@
   </section>
   {% endfor %}
 
-  <!-- References section -->
   <section id="references">
     <h2>References</h2>
     {% for ref in general.References %}
