@@ -130,6 +130,7 @@ def generate_pages():
     init_template()
     count = 0
     archive = {}
+    now_string = datetime.now(gettz('Europe/Rome')).isoformat()
 
     with open(data_csv, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -175,18 +176,18 @@ def generate_pages():
                 'Journal_Title': row.get('Journal_Title'),
                 'Journal_ISSN': row.get('Journal_ISSN'),
                 'Journal_Publisher': row.get('Journal_Publisher'),
-                'PublicationDate': row.get('Available',''),  # Renamed from PublicationDate
+                'PublicationDate': row.get('Available',''),
                 'PublicationYear': year,
                 'SubmissionDate': row.get('SubmissionDate',''),
-                'IssueDate': row.get('Issued',''),  # Renamed from IssueDate
+                'IssueDate': row.get('Issued',''),
                 'Volume': vol,
                 'Issue': issue,
                 'Pages': f"{row.get('First_Page','')}-{row.get('Last_Page','')}".strip('-'),
                 'DOI': row.get('DOI'),
                 'Citation_Date': raw_cit,
                 'DatePublishedISO': date_iso,
-                'Full_Text_HTML_URL': row.get('HTML_URL_viewer'),  # Renamed
-                'PDF_URL': row.get('PDF_URL_viewer'),  # Renamed
+                'Full_Text_HTML_URL': row.get('HTML_URL_viewer'),
+                'PDF_URL': row.get('PDF_URL_viewer'),
                 'Full_Text_XML_URL': row.get('Full_Text_XML_URL'),
                 'License_URL': row.get('License_URL'),
                 'License_Type': row.get('License_Type'),
@@ -209,7 +210,8 @@ def generate_pages():
                 'title_en': title_en,
                 'path': rel_path,
                 'mirror_url': f"{tmpl_base}/{rel_path}",
-                'original_url': f"{ORIGINAL_BASE}/{aid}"
+                'original_url': f"{ORIGINAL_BASE}/{aid}",
+                'generated_at': now_string
             }
             html = template.render(context)
             with open(out_file,'w',encoding='utf-8') as f:
@@ -239,7 +241,7 @@ def generate_pages():
     idx_html = index_tmpl.render(
         journal=JOURNAL_META,
         archive=archive,
-        generated_at=datetime.now(gettz('Europe/Rome')).isoformat()
+        generated_at=now_string
     )
     idx_file = os.path.join(output_dir,'index.html')
     with open(idx_file,'w',encoding='utf-8') as f:
