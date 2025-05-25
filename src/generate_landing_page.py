@@ -13,11 +13,9 @@ from dateutil.tz import gettz
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # === CONFIGURAZIONE ===
-# script is in src/, repo root is 1 level up
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT  = os.path.dirname(SCRIPT_DIR)
 
-# now data/ and templates/ at repo root
 data_csv      = os.path.join(REPO_ROOT, 'data', 'FI_metadata.csv')
 template_dir  = os.path.join(REPO_ROOT, 'templates')
 template_file = 'landing_template.html'
@@ -26,7 +24,6 @@ index_template = 'index_template.html'
 
 LANGUAGES = ['en', 'it', 'fr', 'es', 'pt']
 
-# Journal metadata
 JOURNAL_META = {
     'title': 'Formazione & insegnamento',
     'alternative': 'Formazione e insegnamento',
@@ -49,11 +46,9 @@ JOURNAL_META = {
     'license': 'https://creativecommons.org/licenses/by/4.0'
 }
 
-# Base URLs
 tmpl_base     = 'https://formazione-insegnamento.eu'
 ORIGINAL_BASE = JOURNAL_META['url'] + '/article/view'
 
-# Utility to slugify text
 def slugify(text, max_length=60):
     text = unicodedata.normalize('NFKD', text)
     text = text.encode('ascii', 'ignore').decode('ascii')
@@ -61,40 +56,26 @@ def slugify(text, max_length=60):
     text = re.sub(r'[^a-z0-9]+', '-', text)
     return text.strip('-')[:max_length]
 
-# Parse JSON authors
 def parse_authors(detail_str):
     try:
         authors = json.loads(detail_str)
-        return [
-            {
-                'name': a.get('name'),
-                'affiliation': a.get('affiliation'),
-                'orcid': a.get('orcid'),
-                'email': a.get('email'),
-                'country': a.get('country')
-            }
-            for a in authors
-        ]
+        return [{
+            'name': a.get('name'),
+            'affiliation': a.get('affiliation'),
+            'orcid': a.get('orcid'),
+            'email': a.get('email'),
+            'country': a.get('country')
+        } for a in authors]
     except:
         return []
 
-# Parse JSON references
 def parse_references(ref_str):
     try:
         refs = json.loads(ref_str)
-        processed = []
-        for r in refs:
-            r_html = re.sub(
-                r'(https?://[^\s]+)',
-                lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>',
-                r
-            )
-            processed.append(r_html)
-        return processed
+        return [re.sub(r'(https?://[^\s]+)', lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>', r) for r in refs]
     except:
         return []
 
-# Verify input/output paths
 def verify_paths():
     if not os.path.isfile(data_csv):
         print(f"Errore: CSV non trovato: {data_csv}")
@@ -104,7 +85,6 @@ def verify_paths():
         sys.exit(1)
     os.makedirs(output_dir, exist_ok=True)
 
-# Initialize Jinja2 templates
 env = None
 template = None
 index_tmpl = None
@@ -119,12 +99,10 @@ def init_template():
     template = env.get_template(template_file)
     index_tmpl = env.get_template(index_template)
 
-# Helper to fetch multi-language fields
 def get_field(row, base, lang=None):
     key = f"{base}_{lang}" if lang else base
     return (row.get(key, '') or '').strip()
 
-# Main page generation
 def generate_pages():
     verify_paths()
     init_template()
@@ -134,13 +112,21 @@ def generate_pages():
 
     with open(data_csv, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
-        for raw in reader:
-            row = {k.strip(): v for k,v in raw.items()}
+        rows = sorted(
+            [dict((k.strip(), v) for k, v in row.items()) for row in reader],
+            key=lambda r: (
+                int(r.get('PublicationYear', 0) or 0),
+                int(r.get('Volume', 0) or 0),
+                int(r.get('Issue', 0) or 0),
+                int(re.findall(r'\d+', r.get('First_Page', '0'))[0] or 0)
+            )
+        )
+
+        for row in rows:
             aid = row.get('ArticleID','').strip()
             if not aid:
                 continue
 
-            # parse dates
             raw_cit = row.get('Citation_Date','')
             try:
                 dt = isoparse(raw_cit).replace(tzinfo=gettz('Europe/Rome'))
@@ -148,17 +134,14 @@ def generate_pages():
             except:
                 date_iso = f"{raw_cit}T00:00:00+01:00"
 
-            # title and slug
             title_en = get_field(row,'Title','en') or get_field(row,'Title','it') or ''
             slug_raw = row.get('Slug') or title_en or aid
             slug = slugify(slug_raw) or f"article-{aid}"
 
-            # volume, issue
             year = row.get('PublicationYear','').strip() or 'unknown-year'
             vol = row.get('Volume','').strip() or '0'
             issue = row.get('Issue','').strip() or '0'
 
-            # build dirs and paths
             vol_dir = f"{year}-{vol}"
             issue_dir = issue
             filename = f"{slug}.html"
@@ -167,11 +150,9 @@ def generate_pages():
             os.makedirs(out_dir,exist_ok=True)
             out_file = os.path.join(out_dir,filename)
 
-            # parse lists
             authors_list = parse_authors(row.get('Authors_Detail','[]'))
             refs_list    = parse_references(row.get('References','[]'))
 
-            # page metadata
             general = {
                 'Journal_Title': row.get('Journal_Title'),
                 'Journal_ISSN': row.get('Journal_ISSN'),
@@ -196,7 +177,6 @@ def generate_pages():
                 'References': refs_list
             }
 
-            # render article page
             context = {
                 'journal': JOURNAL_META,
                 'general': general,
@@ -219,7 +199,6 @@ def generate_pages():
             print(f"Generata: {out_file}")
             count += 1
 
-            # build archive entry with sorting
             first_page = row.get('First_Page','').strip()
             if first_page.isdigit():
                 sort_key = (1, int(first_page))
@@ -237,7 +216,6 @@ def generate_pages():
                        'page_sort_key': sort_key
                    })
 
-    # render index page
     idx_html = index_tmpl.render(
         journal=JOURNAL_META,
         archive=archive,
