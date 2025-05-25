@@ -1,252 +1,106 @@
-from datetime import datetime
-from dateutil.tz import gettz
+<!DOCTYPE html>
+<html lang="{{ journal.language }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-#!/usr/bin/env python3
-r"""
-generate_landing_page.py
-Genera landing page HTML dal database CSV.
-Richiede: pip install jinja2 python-dateutil
-"""
-import os, csv, sys, re, unicodedata, json
-from dateutil.parser import isoparse
-from dateutil.tz import gettz
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+  <meta name="alternate-site" content="This is an officially curated alternate landing page for repository, SEO, and indexing purposes. Maintained by the Executive Editorial Office and Pensa MultiMedia.">
 
-# === CONFIGURAZIONE ===
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT  = os.path.dirname(SCRIPT_DIR)
+  <title>{{ languages[0].title }} | {{ journal.title }} (Alternate Landing Page)</title>
+  <meta name="description" content="{{ languages[0].abstract }}">
+  <meta name="keywords" content="{{ languages[0].keywords }}">
+  <link rel="canonical" href="{{ mirror_url }}">
 
-data_csv      = os.path.join(REPO_ROOT, 'data', 'FI_metadata.csv')
-template_dir  = os.path.join(REPO_ROOT, 'templates')
-template_file = 'landing_template.html'
-output_dir    = os.path.join(REPO_ROOT, 'output')
-index_template = 'index_template.html'
+  <!-- Journal-level metadata -->
+  <meta name="journal_title" content="{{ journal.title }}">
+  <meta name="journal_abbrev" content="{{ journal.abbrev }}">
+  <meta name="journal_alternative" content="{{ journal.alternative }}">
+  <meta name="journal_publisher" content="{{ journal.publisher }}">
+  <meta name="journal_editor" content="{{ journal.editor }}">
+  <meta name="journal_director" content="{{ journal.director }}">
+  <meta name="journal_issn" content="{{ journal.issn }}">
+  <meta name="journal_issn_l" content="{{ journal.issn_l }}">
+  <meta name="journal_url" content="{{ journal.url }}">
+  <meta name="journal_license" content="{{ journal.license }}">
 
-LANGUAGES = ['en', 'it', 'fr', 'es', 'pt']
+  {% for sec in languages %}
+    <meta name="DC.Title" xml:lang="{{ sec.lang }}" content="{{ sec.title }}">
+    <meta name="DC.Description" xml:lang="{{ sec.lang }}" content="{{ sec.abstract }}">
+    <meta name="DC.Subject" xml:lang="{{ sec.lang }}" content="{{ sec.keywords }}">
+  {% endfor %}
 
-JOURNAL_META = {
-    'title': 'Formazione & insegnamento',
-    'alternative': 'Formazione e insegnamento',
-    'abbrev': 'Form. insegn. (Online)',
-    'issn': '2279-7505',
-    'issn_l': '1973-4778',
-    'publisher': 'Pensa MultiMedia',
-    'creator': 'Umberto Margiotta',
-    'editor': 'Andrea Mattia Marcelli',
-    'director': 'Rita Minello',
-    'contributors_corporate': [
-        'SIREF – Società Italiana per la Ricerca Educativa e Formativa',
-        'SSIS Veneto',
-        'SIEMeS – Società Italiana Educazione Motoria e Sportiva'
+  <meta name="DC.Publisher" content="{{ journal.publisher }}">
+  <meta name="DC.Rights" content="CC BY 4.0">
+  <meta name="DC.Identifier" content="{{ mirror_url }}">
+  <meta name="DC.Source" content="{{ journal.url }}">
+  <meta name="DC.Type" content="Text.Serial.Journal">
+  <meta name="DC.Language" content="{{ journal.language }}">
+  <meta name="DC.Rights.Holder" content="Pensa MultiMedia (until 2022); Authors (from 2022)">
+  <meta name="DC.Coverage" content="Italia; Europa; internazionale">
+  <meta name="DC.Date.issued" content="{{ general.IssueDate }}">
+  <meta name="DC.Date.available" content="{{ general.PublicationDate }}">
+
+  <!-- JATS4R / Highwire -->
+  <meta name="citation_title" content="{{ languages[0].title }}">
+  {% for auth in general.Authors %}
+    <meta name="citation_author" content="{{ auth.name }}">
+  {% endfor %}
+  <meta name="citation_publication_date" content="{{ general.IssueDate }}T00:00:00+01:00">
+  <meta name="citation_online_date" content="{{ general.PublicationDate }}T00:00:00+01:00">
+  <meta name="citation_journal_title" content="{{ journal.title }}">
+  <meta name="citation_issn" content="{{ journal.issn }}">
+  <meta name="citation_firstpage" content="{{ general.Pages.split('-')[0] }}">
+  <meta name="citation_lastpage" content="{{ general.Pages.split('-')[1] if '-' in general.Pages else '' }}">
+  <meta name="citation_pdf_url" content="{{ general.PDF_URL }}">
+  <meta name="citation_fulltext_html_url" content="{{ mirror_url }}">
+  {% for ref in general.References %}
+    <meta name="DC.Relation" content="{{ ref|striptags }}">
+    <meta name="citation_reference" content="{{ ref|striptags }}">
+  {% endfor %}
+
+  <!-- JSON-LD Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "{{ languages[0].title }}",
+    "name": [{% for sec in languages %}{"@value": "{{ sec.title }}", "@language": "{{ sec.lang }}"}{% if not loop.last %}, {% endif %}{% endfor %}],
+    "author": [
+      {% for auth in general.Authors %}{"@type": "Person", "name": "{{ auth.name }}", "url": "{{ auth.orcid }}"}{% if not loop.last %}, {% endif %}{% endfor %}
     ],
-    'description': 'Rivista open access sullo studio delle regioni educativo-formative.',
-    'keywords': 'formazione, insegnamento, pedagogia, ricerca educativa',
-    'language': 'it',
-    'url': 'https://ojs.pensamultimedia.it/index.php/siref',
-    'license': 'https://creativecommons.org/licenses/by/4.0'
-}
+    "publisher": { "@type": "Organization", "name": "{{ journal.publisher }}" },
+    "datePublished": "{{ general.IssueDate }}T00:00:00+01:00",
+    "dateCreated": "{{ general.PublicationDate }}T00:00:00+01:00",
+    "inLanguage": "{{ journal.language }}",
+    "citation": [{% for ref in general.References %}"{{ ref|striptags }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+    "isAccessibleForFree": true,
+    "license": "{{ journal.license }}",
+    "identifier": "{{ general.DOI }}",
+    "url": "{{ mirror_url }}",
+    "sameAs": "{{ journal.url }}",
+    "mainEntityOfPage": "{{ mirror_url }}",
+    "additionalProperty": [
+      {
+        "@type": "PropertyValue",
+        "name": "alternate",
+        "value": "This is an officially maintained alternate landing page by the Executive Editorial Office and Pensa MultiMedia."
+      }
+    ]
+  }
+  </script>
 
-tmpl_base     = 'https://formazione-insegnamento.eu'
-ORIGINAL_BASE = JOURNAL_META['url'] + '/article/view'
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="{{ languages[0].title }}">
+  <meta property="og:description" content="{{ languages[0].abstract }}">
+  <meta property="og:url" content="{{ mirror_url }}">
+  <meta property="og:site_name" content="{{ journal.title }} (Indexing Archive)">
+  {% for sec in languages %}
+    <meta property="og:locale:alternate" content="{{ sec.lang }}">
+  {% endfor %}
+  <meta property="og:locale" content="en_US">
 
-def slugify(text, max_length=60):
-    text = unicodedata.normalize('NFKD', text)
-    text = text.encode('ascii', 'ignore').decode('ascii')
-    text = text.lower()
-    text = re.sub(r'[^a-z0-9]+', '-', text)
-    return text.strip('-')[:max_length]
-
-def parse_authors(detail_str):
-    try:
-        authors = json.loads(detail_str)
-        return [
-            {
-                'name': a.get('name'),
-                'affiliation': a.get('affiliation'),
-                'orcid': a.get('orcid'),
-                'email': a.get('email'),
-                'country': a.get('country')
-            }
-            for a in authors
-        ]
-    except:
-        return []
-
-def parse_references(ref_str):
-    try:
-        refs = json.loads(ref_str)
-        processed = []
-        for r in refs:
-            r_html = re.sub(
-                r'(https?://[^\s]+)',
-                lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>',
-                r
-            )
-            processed.append(r_html)
-        return processed
-    except:
-        return []
-
-def verify_paths():
-    if not os.path.isfile(data_csv):
-        print(f"Errore: CSV non trovato: {data_csv}")
-        sys.exit(1)
-    if not os.path.isdir(template_dir):
-        print(f"Errore: template non trovato: {template_dir}")
-        sys.exit(1)
-    os.makedirs(output_dir, exist_ok=True)
-
-env = None
-template = None
-index_tmpl = None
-
-def init_template():
-    global env, template, index_tmpl
-    env = Environment(
-        loader=FileSystemLoader(template_dir),
-        autoescape=select_autoescape(['html','xml'])
-    )
-    env.filters['slugify'] = slugify
-    template = env.get_template(template_file)
-    index_tmpl = env.get_template(index_template)
-
-def get_field(row, base, lang=None):
-    key = f"{base}_{lang}" if lang else base
-    return (row.get(key, '') or '').strip()
-
-def generate_pages():
-    verify_paths()
-    init_template()
-    count = 0
-    archive = {}
-    now_string = datetime.now(gettz('Europe/Rome')).isoformat()
-
-    with open(data_csv, newline='', encoding='utf-8-sig') as csvfile:
-        reader = csv.DictReader(csvfile)
-        all_rows = [dict((k.strip(), v) for k, v in row.items()) for row in reader]
-
-        def safe_int(val):
-            try: return int(val)
-            except: return 0
-
-        def first_page_sort(val):
-            matches = re.findall(r'\d+', val)
-            return int(matches[0]) if matches else 0
-
-        rows = sorted(
-            all_rows,
-            key=lambda r: (
-                safe_int(r.get('PublicationYear', '0')),
-                safe_int(r.get('Volume', '0')),
-                safe_int(r.get('Issue', '0')),
-                first_page_sort(r.get('First_Page', '0'))
-            )
-        )
-
-        for row in rows:
-            aid = row.get('ArticleID','').strip()
-            if not aid:
-                continue
-
-            raw_cit = row.get('Citation_Date','')
-            try:
-                dt = isoparse(raw_cit).replace(tzinfo=gettz('Europe/Rome'))
-                date_iso = dt.isoformat()
-            except:
-                date_iso = f"{raw_cit}T00:00:00+01:00"
-
-            title_en = get_field(row,'Title','en') or get_field(row,'Title','it') or ''
-            slug_raw = row.get('Slug') or title_en or aid
-            slug = slugify(slug_raw) or f"article-{aid}"
-
-            year = row.get('PublicationYear','').strip() or 'unknown-year'
-            vol = row.get('Volume','').strip() or '0'
-            issue = row.get('Issue','').strip() or '0'
-
-            vol_dir = f"{year}-{vol}"
-            issue_dir = issue
-            filename = f"{slug}.html"
-            rel_path = f"{vol_dir}/{issue_dir}/{filename}"
-            out_dir = os.path.join(output_dir,vol_dir,issue_dir)
-            os.makedirs(out_dir,exist_ok=True)
-            out_file = os.path.join(out_dir,filename)
-
-            authors_list = parse_authors(row.get('Authors_Detail','[]'))
-            refs_list    = parse_references(row.get('References','[]'))
-
-            general = {
-                'Journal_Title': row.get('Journal_Title'),
-                'Journal_ISSN': row.get('Journal_ISSN'),
-                'Journal_Publisher': row.get('Journal_Publisher'),
-                'PublicationDate': row.get('Available',''),
-                'PublicationYear': year,
-                'SubmissionDate': row.get('SubmissionDate',''),
-                'IssueDate': row.get('Issued',''),
-                'Volume': vol,
-                'Issue': issue,
-                'Pages': f"{row.get('First_Page','')}-{row.get('Last_Page','')}".strip('-'),
-                'DOI': row.get('DOI'),
-                'Citation_Date': raw_cit,
-                'DatePublishedISO': date_iso,
-                'Full_Text_HTML_URL': row.get('HTML_URL_viewer'),
-                'PDF_URL': row.get('PDF_URL_viewer'),
-                'Full_Text_XML_URL': row.get('Full_Text_XML_URL'),
-                'License_URL': row.get('License_URL'),
-                'License_Type': row.get('License_Type'),
-                'Authors': authors_list,
-                'Article_Type': row.get('Article_Type'),
-                'References': refs_list
-            }
-
-            context = {
-                'journal': JOURNAL_META,
-                'general': general,
-                'languages': [{
-                    'lang': lg,
-                    'title': get_field(row,'Title',lg),
-                    'abstract': get_field(row,'Abstract',lg),
-                    'keywords': get_field(row,'Keywords',lg)
-                } for lg in LANGUAGES],
-                'article_id': aid,
-                'title_en': title_en,
-                'path': rel_path,
-                'mirror_url': f"{tmpl_base}/{rel_path}",
-                'original_url': f"{ORIGINAL_BASE}/{aid}",
-                'generated_at': now_string
-            }
-            html = template.render(context)
-            with open(out_file,'w',encoding='utf-8') as f:
-                f.write(html)
-            print(f"Generata: {out_file}")
-            count += 1
-
-            first_page = row.get('First_Page','').strip()
-            if first_page.isdigit():
-                sort_key = (1, int(first_page))
-            else:
-                sort_key = (0, first_page.lower() or '')
-
-            archive.setdefault(year, {}) \
-                   .setdefault(vol, {}) \
-                   .setdefault(issue, []) \
-                   .append({
-                       'title_en': title_en,
-                       'path': rel_path,
-                       'authors': [a['name'] for a in authors_list if a.get('name')],
-                       'pages': general['Pages'],
-                       'page_sort_key': sort_key
-                   })
-
-    idx_html = index_tmpl.render(
-        journal=JOURNAL_META,
-        archive=archive,
-        generated_at=now_string
-    )
-    idx_file = os.path.join(output_dir,'index.html')
-    with open(idx_file,'w',encoding='utf-8') as f:
-        f.write(idx_html)
-    print(f"Generata: {idx_file}")
-    print(f"Totale: {count} pagine generate in '{output_dir}'.")
-
-if __name__ == '__main__':
-    generate_pages()
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ languages[0].title }}">
+  <meta name="twitter:description" content="{{ languages[0].abstract }}">
