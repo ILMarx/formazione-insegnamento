@@ -18,7 +18,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT  = os.path.dirname(SCRIPT_DIR)
 
 # now data/ and templates/ at repo root
-data_csv      = os.path.join(REPO_ROOT, 'data', 'FI_DATABASE.csv')
+data_csv      = os.path.join(REPO_ROOT, 'data', 'FI_metadata.csv')
 template_dir  = os.path.join(REPO_ROOT, 'templates')
 template_file = 'landing_template.html'
 output_dir    = os.path.join(REPO_ROOT, 'output')
@@ -149,21 +149,12 @@ def generate_pages():
 
             # title and slug
             title_en = get_field(row,'Title','en') or get_field(row,'Title','it') or ''
-            slug = (row.get('Slug') or slugify(title_en) or aid).strip()
+            slug = row.get('Slug') or slugify(title_en) or aid
 
-            # year, volume, issue
-            raw_year = row.get('PublicationYear','').strip()
-            try:
-                year = str(int(float(raw_year)))
-            except:
-                year = raw_year or 'unknown-year'
-            try:
-                vol = str(int(year) - 2002)
-            except:
-                raw_vol = row.get('Volume','').strip()
-                vol = raw_vol.replace(' ','-') or '0'
-            raw_issue = row.get('Issue','').strip()
-            issue = raw_issue.replace(' ','-') or '0'
+            # volume, issue
+            year = row.get('PublicationYear','').strip() or 'unknown-year'
+            vol = row.get('Volume','').strip() or '0'
+            issue = row.get('Issue','').strip() or '0'
 
             # build dirs and paths
             vol_dir = f"{year}-{vol}"
@@ -185,7 +176,7 @@ def generate_pages():
                 'Journal_Publisher': row.get('Journal_Publisher'),
                 'PublicationDate': row.get('PublicationDate',''),
                 'PublicationYear': year,
-                'SubmissionDate': row.get('SubmissionDate',''),   # <-- FIXED HERE
+                'SubmissionDate': row.get('SubmissionDate',''),
                 'IssueDate': row.get('IssueDate',''),
                 'Volume': vol,
                 'Issue': issue,
