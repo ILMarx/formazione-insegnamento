@@ -149,7 +149,8 @@ def generate_pages():
 
             # title and slug
             title_en = get_field(row,'Title','en') or get_field(row,'Title','it') or ''
-            slug = row.get('Slug') or slugify(title_en) or aid
+            slug_raw = row.get('Slug') or title_en or aid
+            slug = slugify(slug_raw) or f"article-{aid}"
 
             # volume, issue
             year = row.get('PublicationYear','').strip() or 'unknown-year'
@@ -174,18 +175,18 @@ def generate_pages():
                 'Journal_Title': row.get('Journal_Title'),
                 'Journal_ISSN': row.get('Journal_ISSN'),
                 'Journal_Publisher': row.get('Journal_Publisher'),
-                'PublicationDate': row.get('PublicationDate',''),
+                'PublicationDate': row.get('Available',''),  # Renamed from PublicationDate
                 'PublicationYear': year,
                 'SubmissionDate': row.get('SubmissionDate',''),
-                'IssueDate': row.get('IssueDate',''),
+                'IssueDate': row.get('Issued',''),  # Renamed from IssueDate
                 'Volume': vol,
                 'Issue': issue,
                 'Pages': f"{row.get('First_Page','')}-{row.get('Last_Page','')}".strip('-'),
                 'DOI': row.get('DOI'),
                 'Citation_Date': raw_cit,
                 'DatePublishedISO': date_iso,
-                'Full_Text_HTML_URL': row.get('Full_Text_HTML_URL'),
-                'PDF_URL': row.get('PDF_URL'),
+                'Full_Text_HTML_URL': row.get('HTML_URL_viewer'),  # Renamed
+                'PDF_URL': row.get('PDF_URL_viewer'),  # Renamed
                 'Full_Text_XML_URL': row.get('Full_Text_XML_URL'),
                 'License_URL': row.get('License_URL'),
                 'License_Type': row.get('License_Type'),
