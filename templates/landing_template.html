@@ -63,6 +63,8 @@
   <meta name="citation_publication_date" content="{{ general.IssueDate }}T00:00:00+01:00">
   <meta name="citation_journal_title" content="{{ journal.title }}">
   <meta name="citation_issn" content="{{ journal.issn }}">
+  <meta name="citation_volume" content="{{ general.Volume }}">
+  <meta name="citation_issue" content="{{ general.Issue }}">
   <meta name="citation_firstpage" content="{{ general.Pages.split('-')[0] }}">
   <meta name="citation_lastpage" content="{{ general.Pages.split('-')[1] if '-' in general.Pages else '' }}">
   <meta name="citation_pdf_url" content="{{ general.PDF_URL }}">
@@ -80,12 +82,14 @@
     "@context": "https://schema.org",
     "@type": "ScholarlyArticle",
     "headline": "{{ languages[0].title }}",
+    "volumeNumber": "{{ general.Volume }}",
+    "issueNumber": "{{ general.Issue }}",
     "name": [{% for sec in languages %}{"@value": "{{ sec.title }}", "@language": "{{ sec.lang }}"}{% if not loop.last %}, {% endif %}{% endfor %}],
     "author": [
       {% for auth in general.Authors %}{"@type": "Person", "name": "{{ auth.name }}", "url": "{{ auth.orcid }}"}{% if not loop.last %}, {% endif %}{% endfor %}
     ],
     "publisher": { "@type": "Organization", "name": "{{ journal.publisher }}" },
-    "dateCreated": "{{ general.PublicationDate }}T00:00:00+01:00",
+    "dateCreated": "{{ general.SubmissionDate }}T00:00:00+01:00",
     "dateSubmitted": "{{ general.SubmissionDate }}T00:00:00+01:00",
     "dateAccepted": "{{ general.AcceptanceDate }}T00:00:00+01:00",
     "datePublished": "{{ general.IssueDate }}T00:00:00+01:00",
@@ -93,7 +97,7 @@
     "citation": [{% for ref in general.References %}"{{ ref|striptags }}"{% if not loop.last %}, {% endif %}{% endfor %}],
     "isAccessibleForFree": true,
     "license": "{{ journal.license }}",
-    "identifier": "{{ general.DOI }}",
+    "identifier": "https://doi.org/{{ general.DOI }}",
     "url": "{{ mirror_url }}",
     "sameAs": "{{ journal.url }}",
     "mainEntityOfPage": "{{ mirror_url }}",

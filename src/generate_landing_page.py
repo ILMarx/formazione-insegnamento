@@ -194,6 +194,8 @@ def generate_pages():
                 'SubmissionDate': row.get('SubmissionDate',''),
                 'AcceptanceDate':  row.get('Accepted',''),
                 'IssueDate': row.get('IssueDate',''),
+                'Volume': row.get('Volume', ''),
+                'Issue': row.get('Issue', ''),
                 'Pages': f"{row.get('First_Page','')}-{row.get('Last_Page','')}".strip('-'),
                 'DOI': row.get('DOI'),
                 'Citation_Date': raw_cit,
