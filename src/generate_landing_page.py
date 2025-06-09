@@ -159,7 +159,12 @@ def generate_pages():
             slug_raw = row.get('Slug') or title_en or aid
             slug = slugify(slug_raw) or f"article-{aid}"
 
-            year = row.get('PublicationYear','').strip() or 'unknown-year'
+            issue_date_str = row.get('IssueDate', '').strip()
+            try:
+                issue_date = isoparse(issue_date_str)
+                year = str(issue_date.year)
+            except:
+                year = 'unknown-year'
             vol = row.get('Volume','').strip() or '0'
             issue = row.get('Issue','').strip() or '0'
 
