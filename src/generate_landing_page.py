@@ -133,10 +133,16 @@ def generate_pages():
             matches = re.findall(r'\d+', val)
             return int(matches[0]) if matches else 0
 
+        def extract_year_from_issue(r):
+            try:
+                return isoparse(r.get('IssueDate', '')).year
+            except:
+                return 0
+        
         rows = sorted(
             all_rows,
             key=lambda r: (
-                safe_int(r.get('PublicationYear', '0')),
+                extract_year_from_issue(r),
                 safe_int(r.get('Volume', '0')),
                 safe_int(r.get('Issue', '0')),
                 first_page_sort(r.get('First_Page', '0'))
@@ -159,7 +165,12 @@ def generate_pages():
             slug_raw = row.get('Slug') or title_en or aid
             slug = slugify(slug_raw) or f"article-{aid}"
 
-            year = row.get('PublicationYear','').strip() or 'unknown-year'
+            issue_date_str = row.get('IssueDate', '').strip()
+            try:
+                issue_date = isoparse(issue_date_str)
+                year = str(issue_date.year)
+            except:
+                year = 'unknown-year'
             vol = row.get('Volume','').strip() or '0'
             issue = row.get('Issue','').strip() or '0'
 
