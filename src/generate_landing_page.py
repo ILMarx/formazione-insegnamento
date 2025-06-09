@@ -12,7 +12,7 @@ from dateutil.parser import isoparse
 from dateutil.tz import gettz
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-# === CONFIGURAZIONE ===
+# === CONFIGURAZIONE DI BASE ===
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT  = os.path.dirname(SCRIPT_DIR)
 
