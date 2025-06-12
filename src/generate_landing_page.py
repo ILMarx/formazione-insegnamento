@@ -93,42 +93,39 @@ def parse_authors(detail_str):
 
 def parse_references(ref_str: str):
     """
-    1) try to JSON-load into a list of strings
-    2) if that fails, split on </p> or blank lines, stripping any tags
-    3) clean each via clean_ref()
+    1) strip outer [ "  ...  " ]
+    2) split on '", "'
+    3) for each chunk: collapse Excel-quotes, strip stray backslashes/quotes
     4) hyperlink URLs
     """
-    txt = (ref_str or '').strip()
-    # If wrapped in quotes, drop them and un-escape Excel-style
-    if txt.startswith('"') and txt.endswith('"'):
-        txt = txt[1:-1].replace('""', '"')
+    txt = (ref_str or "").strip()
 
-    # attempt JSON-parse
-    try:
-        raw = json.loads(txt)
-        if not isinstance(raw, list):
-            raise ValueError
-        entries = raw
-    except Exception:
-        # fallback: split on HTML paragraphs or double newlines
-        if '<p>' in txt.lower():
-            parts = re.split(r'</p\s*>', txt, flags=re.IGNORECASE)
-            entries = [re.sub(r'<[^>]+>', '', p).strip() for p in parts if p.strip()]
-        else:
-            entries = [p.strip() for p in re.split(r'\n{2,}', txt) if p.strip()]
+    # 1) remove outer [","] 
+    if txt.startswith('["') and txt.endswith('"]'):
+        txt = txt[2:-2]
 
-    # clean + hyperlink each
+    # 2) split on the delimiter
+    parts = re.split(r'"\s*,\s*"', txt)
+
     out = []
-    for r in entries:
-        c = clean_ref(r)
-        c = re.sub(
+    for p in parts:
+        # 3a) collapse Excel-style "" → "
+        p = p.replace('""', '"')
+        # 3b) remove any literal backslashed quotes
+        p = p.replace('\\"', '')
+        # 3c) strip any remaining leading/trailing quotes/spaces
+        p = p.strip().strip('"').strip()
+
+        # 4) hyperlink URLs
+        p = re.sub(
             r'(https?://[^\s<]+)',
             lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>',
-            c
+            p
         )
-        out.append(c)
-    return out
+        out.append(p)
 
+    return out
+    
 def verify_paths():
     if not os.path.isfile(data_csv):
         print(f"Errore: CSV non trovato: {data_csv}")
