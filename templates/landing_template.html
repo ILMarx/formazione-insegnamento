@@ -196,13 +196,6 @@
         missing data
       {% endif %}
     </p>
-    <p><strong>Full Text XML:</strong>
-      {% if general.Full_Text_XML_URL %}
-        <a href="{{ general.Full_Text_XML_URL }}" target="_blank">{{ general.Full_Text_XML_URL }}</a>
-      {% else %}
-        missing data
-      {% endif %}
-    </p>
     <p><strong>Alternate URL:</strong>
       <a href="{{ mirror_url }}" target="_blank">{{ mirror_url }}</a>
     </p>
@@ -236,6 +229,15 @@
       <li><strong>Acceptance Date:</strong> {{ general.AcceptanceDate or 'missing data' }}</li>
       <li><strong>Available (Online First):</strong> {{ general.PublicationDate or 'missing data' }}</li>
       <li><strong>Issued (Official Publication):</strong> {{ general.IssueDate or 'missing data' }}</li>
+      <li><strong>Copyrighted:</strong> {{ general.Copyrighted or 'missing data' }}</li>
+      <li><strong>Updated:</strong>
+        {{ general.Updated
+           or 'This work has only one Version of Record' }}
+      </li>
+      <li><strong>Withdrawn:</strong>
+        {{ general.Withdrawn
+           or 'This work is currently accepted by the publisher and not subject to withdrawal' }}
+      </li>
       <li><strong>Pages:</strong> {{ general.Pages or 'missing data' }}</li>
       <li><strong>DOI:</strong>
         {% if general.DOI %}

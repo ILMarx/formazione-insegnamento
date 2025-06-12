@@ -12,6 +12,25 @@ from dateutil.parser import isoparse
 from dateutil.tz import gettz
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+def clean_ref(r: str) -> str:
+    """
+    1) strip leading/trailing quotes
+    2) collapse Excel-style "" → "
+    3) remove literal \" sequences
+    4) strip any HTML tags
+    5) strip stray trailing quote on a URL
+    """
+    # 1 & 2
+    text = r.strip().lstrip('"').rstrip('"').replace('""', '"')
+    # 3
+    text = text.replace('\\"', '')
+    # 4 remove any HTML tags
+    if re.search(r'<\/?[a-z][^>]*>', text, flags=re.IGNORECASE):
+        text = re.sub(r'<[^>]+>', '', text).strip()
+    # 5 drop a trailing quote after a URL, if any
+    text = re.sub(r'(https?://[^\s"]+)"$', r'\1', text)
+    return text
+
 # === CONFIGURAZIONE DI BASE ===
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT  = os.path.dirname(SCRIPT_DIR)
@@ -72,20 +91,43 @@ def parse_authors(detail_str):
     except:
         return []
 
-def parse_references(ref_str):
+def parse_references(ref_str: str):
+    """
+    1) try to JSON-load into a list of strings
+    2) if that fails, split on </p> or blank lines, stripping any tags
+    3) clean each via clean_ref()
+    4) hyperlink URLs
+    """
+    txt = (ref_str or '').strip()
+    # If wrapped in quotes, drop them and un-escape Excel-style
+    if txt.startswith('"') and txt.endswith('"'):
+        txt = txt[1:-1].replace('""', '"')
+
+    # attempt JSON-parse
     try:
-        refs = json.loads(ref_str)
-        processed = []
-        for r in refs:
-            r_html = re.sub(
-                r'(https?://[^\s]+)',
-                lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>',
-                r
-            )
-            processed.append(r_html)
-        return processed
-    except:
-        return []
+        raw = json.loads(txt)
+        if not isinstance(raw, list):
+            raise ValueError
+        entries = raw
+    except Exception:
+        # fallback: split on HTML paragraphs or double newlines
+        if '<p>' in txt.lower():
+            parts = re.split(r'</p\s*>', txt, flags=re.IGNORECASE)
+            entries = [re.sub(r'<[^>]+>', '', p).strip() for p in parts if p.strip()]
+        else:
+            entries = [p.strip() for p in re.split(r'\n{2,}', txt) if p.strip()]
+
+    # clean + hyperlink each
+    out = []
+    for r in entries:
+        c = clean_ref(r)
+        c = re.sub(
+            r'(https?://[^\s<]+)',
+            lambda m: f'<a href="{m.group(0)}" target="_blank">{m.group(0)}</a>',
+            c
+        )
+        out.append(c)
+    return out
 
 def verify_paths():
     if not os.path.isfile(data_csv):
@@ -183,7 +225,7 @@ def generate_pages():
             out_file = os.path.join(out_dir,filename)
 
             authors_list = parse_authors(row.get('Authors_Detail','[]'))
-            refs_list    = parse_references(row.get('References','[]'))
+            refs_list    = parse_references(row.get('References',''))
 
             general = {
                 'Journal_Title': row.get('Journal_Title'),
@@ -204,9 +246,11 @@ def generate_pages():
                 'PDF_URL': row.get('PDF_URL_viewer'),
                 'Full_Text_HTML_File': row.get('HTML_URL_file',''),
                 'Full_Text_PDF_File': row.get('PDF_URL_file',''),
-                'Full_Text_XML_URL': row.get('Full_Text_XML_URL',''),
                 'License_URL': row.get('License_URL'),
                 'License_Type': row.get('License_Type'),
+                'Copyrighted':    row.get('Copyrighted',''),
+                'Updated':        row.get('Updated',''),
+                'Withdrawn':      row.get('Withdrawn',''),
                 'Authors': authors_list,
                 'Article_Type': row.get('Article_Type'),
                 'References': refs_list
