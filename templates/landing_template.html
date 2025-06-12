@@ -132,6 +132,11 @@
 
   <style>
     body { font-family: 'Noto Sans', sans-serif; padding: 2.5em; color: #222; }
+    .back-to-home {
+      font-family: inherit;
+      font-size: 0.95em;
+      margin-bottom: 1em;
+    }
     a { color: #006798; }
     header { background-color: #f7e3c6; padding: 1.5em; border-radius: 8px; margin-bottom: 2em; }
     section { margin-bottom: 2em; }
@@ -146,6 +151,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
 </head>
 <body>
+  <div class="back-to-home">
+    <a href="https://formazione-insegnamento.eu/">← Back to Home</a>
+  </div>
   <header>
     <h1>{{ languages[0].title }}</h1>
     <p style="font-size:1.25em; font-style:italic; margin-top:0;">{{ journal.title }}</p>
@@ -259,6 +267,9 @@
   </section>
 
   <footer>
+    <div class="back-to-home">
+      <a href="https://formazione-insegnamento.eu/">← Back to Home</a>
+    </div>
     <small>Last updated: {{ generated_at }}</small>
   </footer>
 </body>
