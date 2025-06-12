@@ -204,9 +204,11 @@ def generate_pages():
                 'PDF_URL': row.get('PDF_URL_viewer'),
                 'Full_Text_HTML_File': row.get('HTML_URL_file',''),
                 'Full_Text_PDF_File': row.get('PDF_URL_file',''),
-                'Full_Text_XML_URL': row.get('Full_Text_XML_URL',''),
                 'License_URL': row.get('License_URL'),
                 'License_Type': row.get('License_Type'),
+                'Copyrighted':    row.get('Copyrighted',''),
+                'Updated':        row.get('Updated',''),
+                'Withdrawn':      row.get('Withdrawn',''),
                 'Authors': authors_list,
                 'Article_Type': row.get('Article_Type'),
                 'References': refs_list
