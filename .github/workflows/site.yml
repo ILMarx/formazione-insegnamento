@@ -33,12 +33,11 @@ jobs:
       - name: Generate sitemap.xml
         uses: cicirello/generate-sitemap@v1.10.1
         with:
-          base-url-path: "https://formazione-insegnamento.eu"
-          source-dir: "output"
+          base-url-path: "https://formazione-insegnamento.eu/"
+          path-to-root: "output"
+          drop-html-extension: true
 
-      - name: Copy sitemap to output root
-        run: |
-          mv sitemap.xml output/
+      # ——— remove or replace the mv step ———
 
       - name: Copy CNAME to output/ (if using a custom domain)
         run: |
