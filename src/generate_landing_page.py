@@ -265,7 +265,7 @@ def generate_pages():
                 'article_id': aid,
                 'title_en': title_en,
                 'path': rel_path,
-                'mirror_url': f"{tmpl_base}/{rel_path}",
+                'mirror_url': f"{tmpl_base}/{rel_path[:-5]}" if rel_path.endswith('.html') else f"{tmpl_base}/{rel_path}",
                 'original_url': f"{ORIGINAL_BASE}/{aid}",
                 'generated_at': now_string
             }
