@@ -59,19 +59,20 @@
   {% for auth in general.Authors %}
     <meta name="citation_author" content="{{ auth.name }}">
   {% endfor %}
-  <meta name="citation_submission_date" content="{{ general.SubmissionDate }}T00:00:00+01:00">
-  <meta name="citation_acceptance_date" content="{{ general.AcceptanceDate }}T00:00:00+01:00">
-  <meta name="citation_online_date" content="{{ general.PublicationDate }}T00:00:00+01:00">
+  <meta name="citation_journal_title"    content="{{ journal.title }}">
+  <meta name="citation_issn"             content="{{ journal.issn }}">
+  <meta name="citation_volume"           content="{{ general.Volume }}">
+  <meta name="citation_issue"            content="{{ general.Issue }}">
+  <meta name="citation_firstpage"        content="{{ general.Pages.split('-')[0] }}">
+  <meta name="citation_lastpage"         content="{{ general.Pages.split('-')[1] if '-' in general.Pages else '' }}">
   <meta name="citation_publication_date" content="{{ general.IssueDate }}T00:00:00+01:00">
-  <meta name="citation_journal_title" content="{{ journal.title }}">
-  <meta name="citation_issn" content="{{ journal.issn }}">
-  <meta name="citation_volume" content="{{ general.Volume }}">
-  <meta name="citation_issue" content="{{ general.Issue }}">
-  <meta name="citation_firstpage" content="{{ general.Pages.split('-')[0] }}">
-  <meta name="citation_lastpage" content="{{ general.Pages.split('-')[1] if '-' in general.Pages else '' }}">
-  <meta name="citation_pdf_url" content="{{ general.PDF_URL }}">
-  <!-- point bots at canonical -->
-  <meta name="citation_fulltext_html_url" content="{{ canonical_url }}">
+  <meta name="citation_online_date"      content="{{ general.PublicationDate }}T00:00:00+01:00">
+  <meta name="citation_submission_date"  content="{{ general.SubmissionDate }}T00:00:00+01:00">
+  <meta name="citation_acceptance_date"  content="{{ general.AcceptanceDate }}T00:00:00+01:00">
+
+  <!-- Full-text URLs (pointing at your mirror files) -->
+  <meta name="citation_fulltext_html_url" content="{{ general.Full_Text_HTML_File }}">
+  <meta name="citation_pdf_url"           content="{{ general.Full_Text_PDF_File }}">
 
   <!-- References relations -->
   {% for ref in general.References %}
@@ -111,7 +112,7 @@
     "isAccessibleForFree": true,
     "license": "{{ journal.license }}",
     "identifier": "https://doi.org/{{ general.DOI }}",
-    "url": "{{ page_url }}",
+    "url": "{{ canonical_url }}",
     "sameAs": "{{ journal.url }}",
     "mainEntityOfPage": "{{ canonical_url }}",
     "additionalProperty": [
@@ -180,8 +181,8 @@
   <section class="box">
     <h2>Access and Full Texts</h2>
     <p><strong>Main Article Landing Page:</strong>
-      <!-- user clicks this, with .html -->
-      <a href="{{ page_url }}" target="_blank">{{ page_url }}</a>
+    <!-- link back to the official OJS landing page -->
+    <a href="{{ general.LandingPage }}" target="_blank">{{ general.LandingPage }}</a>
     </p>
     <p><strong>Full Text HTML (viewer):</strong>
       {% if general.Full_Text_HTML_URL %}
@@ -212,7 +213,7 @@
       {% endif %}
     </p>
     <p><strong>Alternate URL:</strong>
-      <a href="{{ page_url }}" target="_blank">{{ page_url }}</a>
+      <a href="{{ canonical_url }}" target="_blank">{{ canonical_url }}</a>
     </p>
   </section>
 
