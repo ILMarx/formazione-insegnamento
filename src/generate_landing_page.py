@@ -1,12 +1,11 @@
-from datetime import datetime
-from dateutil.tz import gettz
-
 #!/usr/bin/env python3
 r"""
 generate_landing_page.py
 Genera landing page HTML dal database CSV.
 Richiede: pip install jinja2 python-dateutil
 """
+from datetime import datetime
+from dateutil.tz import gettz
 import os, csv, sys, re, unicodedata, json
 from dateutil.parser import isoparse
 from dateutil.tz import gettz
@@ -211,18 +210,18 @@ def generate_pages():
             except:
                 year = 'unknown-year'
             vol = row.get('Volume','').strip() or '0'
-            issue = row.get('Issue','').strip() or '0'
+            issue_raw = row.get('Issue','').strip()
+            issue_slug = re.sub(r'\s+', '-', issue_raw) if issue_raw and not issue_raw.isdigit() else issue_raw or '0'
 
             vol_dir = f"{year}-{vol}"
-            issue_dir = issue
             filename = f"{slug}.html"
-            rel_path = f"{vol_dir}/{issue_dir}/{filename}"
-            out_dir = os.path.join(output_dir,vol_dir,issue_dir)
+            rel_path = f"{vol_dir}/{issue_slug}/{filename}"
+            out_dir = os.path.join(output_dir, vol_dir, issue_slug)
             os.makedirs(out_dir,exist_ok=True)
             out_file = os.path.join(out_dir,filename)
 
             # build the *extension‐less* public path
-            rel_path_no_ext = f"{vol_dir}/{issue_dir}/{slug}"
+            rel_path_no_ext = f"{vol_dir}/{issue_slug}/{slug}"
             public_url       = f"{tmpl_base}/{rel_path_no_ext}"
 
             authors_list = parse_authors(row.get('Authors_Detail','[]'))
@@ -293,7 +292,7 @@ def generate_pages():
 
             archive.setdefault(year, {}) \
                    .setdefault(vol, {}) \
-                   .setdefault(issue, []) \
+                   .setdefault(issue_slug, []) \
                    .append({
                        'title_en': title_en,
                        'path': rel_path,
