@@ -221,6 +221,10 @@ def generate_pages():
             os.makedirs(out_dir,exist_ok=True)
             out_file = os.path.join(out_dir,filename)
 
+            # build the *extension‐less* public path
+            rel_path_no_ext = f"{vol_dir}/{issue_dir}/{slug}"
+            public_url       = f"{tmpl_base}/{rel_path_no_ext}"
+
             authors_list = parse_authors(row.get('Authors_Detail','[]'))
             refs_list    = parse_references(row.get('References',''))
 
@@ -266,10 +270,11 @@ def generate_pages():
                 'title_en': title_en,
                 'path': rel_path,
                 # the actual public URL of the generated page, including .html
-                'page_url':    f"{tmpl_base}/{rel_path}",
-                'original_url': f"{ORIGINAL_BASE}/{aid}",
-                # tell the template what should go into <link rel="canonical">
-                'canonical_url': f"{tmpl_base}/{rel_path}",
+                # filesystem path (with .html) remains for file writes:
+                'path':      rel_path,
+                # URLs seen by users & bots omit the .html:
+                'page_url':      public_url + ".html",   # user-clickable link should still point at the actual .html
+                'canonical_url': public_url,             # canonical and OpenGraph etc. drop the .html
                 'generated_at': now_string
             }
             html = template.render(context)
