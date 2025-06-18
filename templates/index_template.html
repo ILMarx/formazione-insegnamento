@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formazione &amp; insegnamento: Alternate Archive</title>
+
+  <!-- extension‐less canonical -->
+  <link rel="canonical" href="{{ base_url }}/">
+
   <link rel="icon" href="https://ojs.pensamultimedia.it/public/journals/6/favicon_it_IT">
 
   <!-- Metadata for SEO, indexing, and interoperability -->
@@ -28,7 +32,8 @@
   <meta name="DC.Language" content="it">
   <meta name="DC.Rights" content="CC BY 4.0">
   <meta name="DC.Format" content="text/html; text/pdf; application/xml">
-  <meta name="DC.Identifier" content="https://ojs.pensamultimedia.it/index.php/siref">
+  <!-- point at our mirror, extension‐less -->
+  <meta name="DC.Identifier" content="{{ base_url }}/">
   <meta name="DC.Coverage" content="Italia; Europa; contesto internazionale; livello scolastico, accademico, formativo">
   <meta name="DC.Contributor.Corporate" content="SIREF – Società Italiana per la Ricerca Educativa e Formativa (2011-)">
   <meta name="DC.Contributor.Corporate" content="SSIS Veneto (2010)">
@@ -39,7 +44,7 @@
   <meta property="og:site_name" content="Formazione &amp; insegnamento (Alternate Archive)">
   <meta property="og:title" content="Formazione &amp; insegnamento (Alternate Archive)">
   <meta property="og:description" content="ALTERNATE ARCHIVE for SEO and repository indexing. Official: https://ojs.pensamultimedia.it/index.php/siref/">
-  <meta property="og:url" content="https://formazione-insegnamento.eu">
+  <meta property="og:url" content="{{ base_url }}/">
   <meta property="og:image" content="https://ojs.pensamultimedia.it/public/journals/6/journalThumbnail_en_US.png">
 
   <!-- Twitter Cards -->
@@ -48,6 +53,8 @@
   <meta name="twitter:description" content="Official alternate landing archive for repository and indexing use.">
   <meta name="twitter:image" content="https://ojs.pensamultimedia.it/public/journals/6/journalThumbnail_en_US.png">
   <meta name="twitter:site" content="@FormazioneInsegnamento">
+  <!-- point at extension‐less home -->
+  <meta name="twitter:url" content="{{ base_url }}/">
 
   <!-- JSON-LD Schema.org -->
   <script type="application/ld+json">
@@ -64,9 +71,9 @@
       "legalName": "Pensa MultiMedia srl",
       "role": "publisher and owner"
     },
-    "url": "https://ojs.pensamultimedia.it/index.php/siref",
+    "url": "{{ base_url }}/",
     "inLanguage": "it",
-    "description": "ALTERNATE ARCHIVE: Formazione & insegnamento is an open access journal for educational research. This is a publisher-maintained alternate landing page. Official site: https://ojs.pensamultimedia.it/index.php/siref/",
+    "description": "ALTERNATE ARCHIVE: Formazione & insegnamento is an open access journal for educational research. Official site: https://ojs.pensamultimedia.it/index.php/siref/",
     "editor": { "@type": "Person", "name": "Andrea Mattia Marcelli" },
     "founder": { "@type": "Person", "name": "Umberto Margiotta" },
     "director": { "@type": "Person", "name": "Rita Minello" },
@@ -77,7 +84,7 @@
     ],
     "license": "https://creativecommons.org/licenses/by/4.0/",
     "isAccessibleForFree": true,
-    "mainEntityOfPage": "https://formazione-insegnamento.eu",
+    "mainEntityOfPage": "{{ base_url }}/",
     "additionalProperty": [
       {
         "@type": "PropertyValue",
@@ -88,7 +95,11 @@
   }
   </script>
 
-    <link rel="service" type="application/oai-pmh+xml" title="OAI-PMH endpoint" href="https://formazioneinsegnamento.pythonanywhere.com/oai">
+  <!-- OAI-PMH endpoint -->
+  <link rel="service" type="application/oai-pmh+xml"
+        title="OAI-PMH endpoint"
+        href="https://formazioneinsegnamento.pythonanywhere.com/oai">
+
   <style>
     body {
       font-family: "Noto Sans", sans-serif;
@@ -146,59 +157,66 @@
     <h1>Formazione &amp; insegnamento Alternate Archive</h1>
     <p>
       This website provides an alternate landing experience for the journal
-      <a href="https://ojs.pensamultimedia.it/index.php/siref/" rel="noopener noreferrer" target="_blank">
+      <a href="https://ojs.pensamultimedia.it/index.php/siref/"
+         rel="noopener noreferrer" target="_blank">
         https://ojs.pensamultimedia.it/index.php/siref/
-      </a>.</br>
+      </a>.<br>
       It is maintained by the Publisher and Executive Editorial Office to enhance search visibility, metadata accuracy, and repository integration.
     </p>
     <p>Browse by Year → Volume → Issue → Article</p>
   </header>
   <main>
-  {% for year, vols in archive.items()|sort(reverse=True) %}
-    <section>
-      <h2>{{ year }}</h2>
-      {% for vol, issues in vols.items()|sort %}
-        <h3>Volume {{ vol }}</h3>
-        <ul>
-          {% for issue, articles in issues.items()|sort %}
-            <li>
-              <strong>Issue {{ issue }}</strong>
-              <ul>
-                {% for art in articles|sort(attribute='page_sort_key') %}
-                  <li class="article-box">
-                    <a href="{{ art.path }}">{{ art.title_en }}</a><br/>
-                    <small class="byline">
-                      {% if art.authors %}
-                        <span>By</span> <em>{{ art.authors | join(', ') }}</em>{% if art.pages %}, {% endif %}
-                      {% endif %}
-                      {% if art.pages %}
-                        Pages: {{ art.pages }}
-                      {% endif %}
-                    </small>
-                  </li>
-                {% endfor %}
-              </ul>
-            </li>
-          {% endfor %}
-        </ul>
-      {% endfor %}
-    </section>
-  {% endfor %}
-</main>
+    {% for year, vols in archive.items()|sort(reverse=True) %}
+      <section>
+        <h2>{{ year }}</h2>
+        {% for vol, issues in vols.items()|sort %}
+          <h3>Volume {{ vol }}</h3>
+          <ul>
+            {% for issue, articles in issues.items()|sort %}
+              <li>
+                <strong>Issue {{ issue }}</strong>
+                <ul>
+                  {% for art in articles|sort(attribute='page_sort_key') %}
+                    <li class="article-box">
+                      {# drop “.html” #}
+                      <a href="{{ art.path[:-5] }}">{{ art.title_en }}</a><br/>
+                      <small class="byline">
+                        {% if art.authors %}
+                          <span>By</span>
+                          <em>{{ art.authors | join(', ') }}</em>{% if art.pages %}, {% endif %}
+                        {% endif %}
+                        {% if art.pages %}
+                          Pages: {{ art.pages }}
+                        {% endif %}
+                      </small>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endfor %}
+      </section>
+    {% endfor %}
+  </main>
   <footer>
     <div class="legal">
       <p>
         <strong>Copyright notice:</strong> Until 2022, the copyright for first publication belongs to Pensa MultiMedia Srl.
         From 2022 onwards, authors retain all rights to their articles.<br>
         All materials published on this website are released under the
-        <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> licence.
+        <a href="https://creativecommons.org/licenses/by/4.0/"
+           target="_blank"
+           rel="noopener noreferrer">CC BY 4.0</a> licence.
       </p>
     </div>
     <div class="disclaimer">
       <p>
         <strong>Disclaimer:</strong> This is an officially maintained alternate site intended for repository interoperability and SEO enhancement.
         It does <u>not</u> collect any identifying data on its users. For the official journal website, visit
-        <a href="https://ojs.pensamultimedia.it/index.php/siref/" rel="noopener noreferrer" target="_blank">Formazione &amp; insegnamento</a>.
+        <a href="https://ojs.pensamultimedia.it/index.php/siref/"
+           rel="noopener noreferrer"
+           target="_blank">Formazione &amp; insegnamento</a>.
       </p>
       <p>Last updated: {{ generated_at }}</p>
     </div>
