@@ -178,10 +178,12 @@
                 <ul>
                   {% for art in articles|sort(attribute='page_sort_key') %}
                     <li class="article-box">
-                      <a href="{{ art.path }}">{{ art.title_en }}</a><br/>
+                      {# drop “.html” #}
+                      <a href="{{ art.path[:-5] }}">{{ art.title_en }}</a><br/>
                       <small class="byline">
                         {% if art.authors %}
-                          <span>By</span> <em>{{ art.authors | join(', ') }}</em>{% if art.pages %}, {% endif %}
+                          <span>By</span>
+                          <em>{{ art.authors | join(', ') }}</em>{% if art.pages %}, {% endif %}
                         {% endif %}
                         {% if art.pages %}
                           Pages: {{ art.pages }}
