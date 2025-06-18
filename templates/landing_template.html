@@ -227,12 +227,14 @@
       {% endif %}
     </p>
 
-    <p><strong>Alternate URL:</strong>
-      <a href="{{ canonical_url }}" target="_blank">
+    <p><strong>Alternate URL (this mirror):</strong>
+      <a href="{{ page_url }}" target="_blank">
         {{ canonical_url }}
       </a>
+      {% else %}
+        missing data
+      {% endif %}
     </p>
-  </section>
 
   <section class="box">
     <h2>Authors</h2>
