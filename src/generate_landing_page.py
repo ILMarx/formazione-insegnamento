@@ -254,7 +254,9 @@ def generate_pages():
                 'Withdrawn':      row.get('Withdrawn',''),
                 'Authors': authors_list,
                 'Article_Type': row.get('Article_Type'),
-                'References': refs_list
+                'References':     refs_list,
+                # ← add this:
+                'LandingPage':    row.get('LandingPage','')
             }
 
             context = {
