@@ -214,7 +214,6 @@ def generate_pages():
             issue_slug = re.sub(r'\s+', '-', issue_raw) if issue_raw and not issue_raw.isdigit() else issue_raw or '0'
 
             vol_dir = f"{year}-{vol}"
-            issue_dir = issue
             filename = f"{slug}.html"
             rel_path = f"{vol_dir}/{issue_slug}/{filename}"
             out_dir = os.path.join(output_dir, vol_dir, issue_slug)
