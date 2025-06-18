@@ -180,40 +180,57 @@
 
   <section class="box">
     <h2>Access and Full Texts</h2>
+
     <p><strong>Main Article Landing Page:</strong>
-    <!-- link back to the official OJS landing page -->
-    <a href="{{ general.LandingPage }}" target="_blank">{{ general.LandingPage }}</a>
+      <a href="{{ general.LandingPage }}" target="_blank">
+        {{ general.LandingPage }}
+      </a>
     </p>
+
     <p><strong>Full Text HTML (viewer):</strong>
       {% if general.Full_Text_HTML_URL %}
-        <a href="{{ general.Full_Text_HTML_URL }}" target="_blank">{{ general.Full_Text_HTML_URL }}</a>
+        <a href="{{ general.Full_Text_HTML_URL }}" target="_blank">
+          {{ general.Full_Text_HTML_URL }}
+        </a>
       {% else %}
         missing data
       {% endif %}
     </p>
+
     <p><strong>Full Text PDF (viewer):</strong>
       {% if general.PDF_URL %}
-        <a href="{{ general.PDF_URL }}" target="_blank">{{ general.PDF_URL }}</a>
+        <a href="{{ general.PDF_URL }}" target="_blank">
+          {{ general.PDF_URL }}
+        </a>
       {% else %}
         missing data
       {% endif %}
     </p>
+
     <p><strong>Full Text HTML (file):</strong>
       {% if general.Full_Text_HTML_File %}
-        <a href="{{ general.Full_Text_HTML_File }}" target="_blank">{{ general.Full_Text_HTML_File }}</a>
+        <a href="{{ general.Full_Text_HTML_File }}" target="_blank">
+          {{ general.Full_Text_HTML_File }}
+        </a>
       {% else %}
         missing data
       {% endif %}
     </p>
+
     <p><strong>Full Text PDF (file):</strong>
       {% if general.Full_Text_PDF_File %}
-        <a href="{{ general.Full_Text_PDF_File }}" target="_blank">{{ general.Full_Text_PDF_File }}</a>
+        <a href="{{ general.Full_Text_PDF_File }}" target="_blank">
+          {{ general.Full_Text_PDF_File }}
+        </a>
       {% else %}
         missing data
       {% endif %}
     </p>
+
     <p><strong>Alternate URL:</strong>
-      <a href="{{ canonical_url }}" target="_blank">{{ canonical_url }}</a>
+      <a href="{{ canonical_url }}" target="_blank">
+        {{ canonical_url }}
+      </a>
     </p>
   </section>
 
