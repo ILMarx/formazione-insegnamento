@@ -1,12 +1,11 @@
-from datetime import datetime
-from dateutil.tz import gettz
-
 #!/usr/bin/env python3
 r"""
 generate_landing_page.py
 Genera landing page HTML dal database CSV.
 Richiede: pip install jinja2 python-dateutil
 """
+from datetime import datetime
+from dateutil.tz import gettz
 import os, csv, sys, re, unicodedata, json
 from dateutil.parser import isoparse
 from dateutil.tz import gettz
