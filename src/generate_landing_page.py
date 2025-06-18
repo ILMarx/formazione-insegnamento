@@ -265,8 +265,11 @@ def generate_pages():
                 'article_id': aid,
                 'title_en': title_en,
                 'path': rel_path,
-                'mirror_url': f"{tmpl_base}/{rel_path[:-5]}" if rel_path.endswith('.html') else f"{tmpl_base}/{rel_path}",
+                # the actual public URL of the generated page, including .html
+                'page_url':    f"{tmpl_base}/{rel_path}",
                 'original_url': f"{ORIGINAL_BASE}/{aid}",
+                # tell the template what should go into <link rel="canonical">
+                'canonical_url': f"{tmpl_base}/{rel_path}",
                 'generated_at': now_string
             }
             html = template.render(context)
