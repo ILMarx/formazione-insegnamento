@@ -9,7 +9,7 @@
   <title>{{ languages[0].title }} | {{ journal.title }} (Alternate Landing Page)</title>
   <meta name="description" content="{{ languages[0].abstract }}">
   <meta name="keywords" content="{{ languages[0].keywords }}">
-  <link rel="canonical" href="{{ mirror_url }}">
+  <link rel="canonical" href="{{ canonical_url }}">
 
   <!-- Journal-level metadata -->
   <meta name="journal_title" content="{{ journal.title }}">
@@ -36,7 +36,7 @@
   <meta name="DC.Creator" content="{{ journal.creator }}">
   <meta name="DC.Publisher" content="{{ journal.publisher }}">
   <meta name="DC.Rights" content="CC BY 4.0">
-  <meta name="DC.Identifier" content="{{ mirror_url }}">
+  <meta name="DC.Identifier" content="{{ page_url }}">
   <meta name="DC.Source" content="{{ journal.url }}">
   <meta name="DC.Type" content="Text.Serial.Journal">
   <meta name="DC.Language" content="{{ journal.language }}">
@@ -68,7 +68,7 @@
   <meta name="citation_firstpage" content="{{ general.Pages.split('-')[0] }}">
   <meta name="citation_lastpage" content="{{ general.Pages.split('-')[1] if '-' in general.Pages else '' }}">
   <meta name="citation_pdf_url" content="{{ general.PDF_URL }}">
-  <meta name="citation_fulltext_html_url" content="{{ mirror_url }}">
+  <meta name="citation_fulltext_html_url" content="{{ page_url }}">
 
   <!-- References relations -->
   {% for ref in general.References %}
@@ -98,9 +98,9 @@
     "isAccessibleForFree": true,
     "license": "{{ journal.license }}",
     "identifier": "https://doi.org/{{ general.DOI }}",
-    "url": "{{ mirror_url }}",
+    "url": "{{ page_url }}",
     "sameAs": "{{ journal.url }}",
-    "mainEntityOfPage": "{{ mirror_url }}",
+    "mainEntityOfPage": "{{ page_url }}",
     "additionalProperty": [
       {
         "@type": "PropertyValue",
@@ -115,7 +115,7 @@
   <meta property="og:type" content="article">
   <meta property="og:title" content="{{ languages[0].title }}">
   <meta property="og:description" content="{{ languages[0].abstract }}">
-  <meta property="og:url" content="{{ mirror_url }}">
+  <meta property="og:url" content="{{ page_url }}">
   <meta property="og:site_name" content="{{ journal.title }} (Alternate Archive)">
   {% for sec in languages %}
     <meta property="og:locale:alternate" content="{{ sec.lang }}">
@@ -197,7 +197,7 @@
       {% endif %}
     </p>
     <p><strong>Alternate URL:</strong>
-      <a href="{{ mirror_url }}" target="_blank">{{ mirror_url }}</a>
+      <a href="{{ page_url }}" target="_blank">{{ page_url }}</a>
     </p>
   </section>
 
